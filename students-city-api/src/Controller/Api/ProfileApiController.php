@@ -111,4 +111,74 @@ class ProfileApiController extends AbstractController
             ], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/api/profile', name: 'api_profile_get', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function getProfile(): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
+        }
+
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'pseudo' => $user->getPseudo(),
+            'email' => $user->getEmail(),
+            'roles' => $user->getRoles(),
+            'status' => $user->getStatus()
+        ]);
+    }
+
+    #[Route('/api/profile', name: 'api_profile_update', methods: ['PUT'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['pseudo']) || !isset($data['email'])) {
+            return new JsonResponse(['error' => 'Pseudo et email sont requis'], 400);
+        }
+
+        $pseudo = trim($data['pseudo']);
+        $email = trim($data['email']);
+
+        if (empty($pseudo) || empty($email)) {
+            return new JsonResponse(['error' => 'Pseudo et email ne peuvent pas être vides'], 400);
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return new JsonResponse(['error' => 'Format d\'email invalide'], 400);
+        }
+
+        // Vérifier si l'email est déjà utilisé par un autre utilisateur
+        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        if ($existingUser && $existingUser->getId() !== $user->getId()) {
+            return new JsonResponse(['error' => 'Cet email est déjà utilisé par un autre utilisateur'], 400);
+        }
+
+        // Mettre à jour les informations
+        $user->setPseudo($pseudo);
+        $user->setEmail($email);
+
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => [
+                'id' => $user->getId(),
+                'pseudo' => $user->getPseudo(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+                'status' => $user->getStatus()
+            ]
+        ]);
+    }
 }

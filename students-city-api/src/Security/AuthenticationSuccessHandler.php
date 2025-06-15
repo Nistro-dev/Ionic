@@ -33,8 +33,45 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
             $user = $token->getUser();
             $this->logger->info('User authenticated successfully', [
                 'email' => $user->getEmail(),
-                'roles' => $user->getRoles()
+                'roles' => $user->getRoles(),
+                'status' => $user->getStatus()
             ]);
+            
+            // Vérifier le statut du compte
+            if ($user->getStatus() === 'en attente') {
+                $this->logger->warning('User login rejected: account pending validation', [
+                    'email' => $user->getEmail()
+                ]);
+                
+                if ($request->headers->get('Accept') === 'application/json' || 
+                    $request->headers->get('Content-Type') === 'application/json') {
+                    return new JsonResponse([
+                        'error' => 'Votre compte est en attente de validation par un administrateur.'
+                    ], Response::HTTP_FORBIDDEN);
+                }
+                
+                return new Response('', Response::HTTP_FOUND, [
+                    'Location' => $this->urlGenerator->generate('app_login', [], UrlGeneratorInterface::ABSOLUTE_URL)
+                ]);
+            }
+
+            if ($user->getStatus() === 'suspendu' || $user->getStatus() === 'banni') {
+                $this->logger->warning('User login rejected: account suspended/banned', [
+                    'email' => $user->getEmail(),
+                    'status' => $user->getStatus()
+                ]);
+                
+                if ($request->headers->get('Accept') === 'application/json' || 
+                    $request->headers->get('Content-Type') === 'application/json') {
+                    return new JsonResponse([
+                        'error' => 'Votre compte a été suspendu. Contactez un administrateur.'
+                    ], Response::HTTP_FORBIDDEN);
+                }
+                
+                return new Response('', Response::HTTP_FOUND, [
+                    'Location' => $this->urlGenerator->generate('app_login', [], UrlGeneratorInterface::ABSOLUTE_URL)
+                ]);
+            }
             
             $jwt = $this->jwtManager->create($user);
             $this->logger->info('JWT token generated successfully');
@@ -77,4 +114,4 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
             ]);
         }
     }
-} 
+}

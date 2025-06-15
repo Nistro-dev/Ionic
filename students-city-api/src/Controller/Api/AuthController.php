@@ -48,6 +48,15 @@ class AuthController extends AbstractController
             return new JsonResponse(['error' => 'Invalid email or password.'], 401);
         }
 
+        // Vérifier le statut du compte
+        if ($user->getStatus() === 'en attente') {
+            return new JsonResponse(['error' => 'Votre compte est en attente de validation par un administrateur.'], 403);
+        }
+
+        if ($user->getStatus() === 'suspendu' || $user->getStatus() === 'banni') {
+            return new JsonResponse(['error' => 'Votre compte a été suspendu. Contactez un administrateur.'], 403);
+        }
+
         if (empty($user->getRoles())) {
             return new JsonResponse(['error' => 'Votre compte n\'est pas encore validé par un administrateur.'], 403);
         }
@@ -55,7 +64,14 @@ class AuthController extends AbstractController
         // Générer un token JWT
         $token = $jwtManager->create($user);
 
-        return new JsonResponse(['token' => $token]);
+        return new JsonResponse([
+            'token' => $token,
+            'redirect' => $this->generateUrl('profile'),
+            'user' => [
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles()
+            ]
+        ]);
     }
 
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
@@ -72,7 +88,6 @@ class AuthController extends AbstractController
 
 
         // On soumet les données JSON comme un tableau
-        $data = json_decode($request->getContent(), true);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
             $errors = [];
@@ -84,13 +99,15 @@ class AuthController extends AbstractController
 
         // Hashage du mot de passe
         $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
-        $user->setRoles([]);
-        $user->setStatus('en attente'); 
+        $user->setRoles([]); // Pas de rôles tant que pas validé
+        $user->setStatus('en attente'); // En attente de validation admin
         $user->setCreateAt(new \DateTimeImmutable());
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return new JsonResponse(['message' => 'User registered successfully'], 201);
+        return new JsonResponse([
+            'message' => 'Inscription réussie ! Votre compte est en attente de validation par un administrateur. Vous recevrez une notification une fois votre compte activé.'
+        ], 201);
     }
 }
