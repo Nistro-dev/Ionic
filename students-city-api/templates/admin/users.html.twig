@@ -1,0 +1,240 @@
+{% extends 'layouts/with_navbar.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <h1 class="h4 mt-3 mb-3">Gestion des utilisateurs</h1>
+    
+    <div id="flash-messages"></div>
+
+    {% if not is_granted('ROLE_ADMIN') %}
+        <div class="alert alert-warning">
+            Vous devez être administrateur pour gérer les utilisateurs.
+        </div>
+    {% else %}
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Pseudo</th>
+                            <th>Email</th>
+                            <th>Rôles</th>
+                            <th>Modifier les rôles</th>
+                            <th>Statut</th>
+                            <th>Date de création</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        <tr id="user-{{ user.id }}">
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.pseudo }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.roles|join(', ') }}</td>
+                            <td>
+                           <form class="role-form d-inline" data-user-id="{{ user.id }}">
+                                    <label class="me-2">
+                                        <input type="checkbox" name="roles[]" value="ROLE_USER" {% if 'ROLE_USER' in user.roles %}checked{% endif %}>
+                                        Utilisateur
+                                    </label>
+                                    <label class="me-2">
+                                        <input type="checkbox" name="roles[]" value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in user.roles %}checked{% endif %}>
+                                        Admin
+                                    </label>
+                                    <button type="submit" class="btn btn-sm btn-primary">Sauvegarder</button>
+                                </form>
+                            </td>
+                            <td>
+                                <span class="status badge {% if user.status == 'validé' %}bg-success{% elseif user.status == 'en attente' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                    {{ user.status }}
+                                </span>
+                            </td>
+                            <td>{{ user.createAt ? user.createAt|date('d/m/Y') : '' }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if user.status != 'validé' %}
+                                        <button onclick="validateUser({{ user.id }})" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Approuver
+                                        </button>
+                                    {% endif %}
+                                    {% if user.status != 'en attente' %}
+                                        <button onclick="revokeUser({{ user.id }})" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-times"></i> Révoquer
+                                        </button>
+                                    {% endif %}
+                                    <button onclick="deleteUser({{ user.id }})" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">Aucun utilisateur trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function showFlashMessage(message, type = 'success') {
+    const flashDiv = document.getElementById('flash-messages');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    flashDiv.appendChild(alert);
+    setTimeout(() => alert.remove(), 5000);
+}
+
+function updateUserRow(userId, status) {
+    const row = document.getElementById(`user-${userId}`);
+    const statusBadge = row.querySelector('.status');
+    const actionsCell = row.querySelector('td:last-child');
+
+    // Mettre à jour le statut
+    statusBadge.className = `status badge ${status === 'validé' ? 'bg-success' : 'bg-warning text-dark'}`;
+    statusBadge.textContent = status;
+
+    // Mettre à jour les boutons d'action
+    let buttonsHtml = '<div class="btn-group">';
+    if (status !== 'validé') {
+        buttonsHtml += `<button onclick="validateUser(${userId})" class="btn btn-sm btn-success">
+            <i class="fas fa-check"></i> Approuver
+        </button>`;
+    }
+    if (status !== 'en attente') {
+        buttonsHtml += `<button onclick="revokeUser(${userId})" class="btn btn-sm btn-danger">
+            <i class="fas fa-times"></i> Révoquer
+        </button>`;
+    }
+    buttonsHtml += '</div>';
+    actionsCell.innerHTML = buttonsHtml;
+}
+
+async function validateUser(userId) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateUserRow(userId, 'validé');
+            showFlashMessage('Utilisateur validé avec succès');
+        } else {
+            throw new Error(data.message || 'Erreur lors de la validation');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showFlashMessage(error.message, 'danger');
+    }
+}
+
+async function revokeUser(userId) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/revoke`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateUserRow(userId, 'en attente');
+            showFlashMessage('Utilisateur révoqué avec succès');
+        } else {
+            throw new Error(data.message || 'Erreur lors de la révocation');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showFlashMessage(error.message, 'danger');
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) {
+            throw new Error('Vous devez être connecté pour effectuer cette action');
+        }
+
+        const response = await fetch(`/api/admin/users/${userId}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        let data;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            data = { message: await response.text() };
+        }
+        
+        if (response.ok) {
+            const row = document.getElementById(`user-${userId}`);
+            if (row) {
+                row.remove();
+            }
+            showFlashMessage('Utilisateur supprimé avec succès');
+        } else {
+            throw new Error(data.message || `Erreur ${response.status}: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showFlashMessage(error.message || 'Une erreur est survenue lors de la suppression', 'danger');
+    }
+}
+
+document.querySelectorAll('.role-form').forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userId = form.getAttribute('data-user-id');
+        const checkedRoles = Array.from(form.querySelectorAll('input[name="roles[]"]:checked')).map(cb => cb.value);
+
+        const response = await fetch(`/api/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
+            },
+            body: JSON.stringify({ roles: checkedRoles })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert('Rôles mis à jour !');
+        } else {
+            alert('Erreur : ' + (data.message || 'Inconnue'));
+        }
+    });
+});
+</script>
+{% endblock %} 

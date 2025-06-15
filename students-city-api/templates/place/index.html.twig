@@ -1,0 +1,231 @@
+{% extends 'layouts/with_navbar.html.twig' %}
+
+{% block title %}Liste des établissements{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+        .view-toggle {
+            margin-bottom: 1rem;
+        }
+        .card-view {
+            display: none;
+        }
+        .map-view {
+            display: none;
+        }
+        .active-view {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block main_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 mb-0">Liste des établissements validés</h1>
+                <a href="{{ path('place_add') }}" class="btn btn-dark">
+                    <i class="fas fa-plus me-2"></i>Ajouter un Établissement
+                </a>
+            </div>
+            <div class="view-toggle">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary active" data-view="card">
+                        <i class="fas fa-list"></i> Liste
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" data-view="map">
+                        <i class="fas fa-map-marker-alt"></i> Carte
+                    </button>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mb-3">
+                <input type="text" class="form-control w-auto" id="filter-name" placeholder="Nom...">
+                <select class="form-select w-auto" id="filter-type">
+                    <option value="">Type de lieu</option>
+                    <option value="Restaurant">Restaurant</option>
+                    <option value="Café">Café</option>
+                    <option value="Bibliothèque">Bibliothèque</option>
+                </select>
+            </div>
+            
+            <!-- Vue Liste -->
+            <div id="card-view" class="card-view active-view">
+                <div class="card shadow">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Type</th>
+                                    <th>Adresse</th>
+                                    <th>Description</th>
+                                    <th>Note moyenne</th>
+                                    <th>Nombre d'avis</th>
+                                    <th>Date de création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="places-tbody">
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Chargement...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vue Carte -->
+            <div id="map-view" class="map-view">
+                <div id="map" class="shadow"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('places-tbody');
+    const filterName = document.getElementById('filter-name');
+    const filterType = document.getElementById('filter-type');
+    let userReviews = [];
+    let allPlaces = [];
+    let map;
+    let markers = [];
+
+    // Initialisation de la carte
+    function initMap() {
+        map = L.map('map').setView([48.8566, 2.3522], 13); // Paris par défaut
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    }
+
+    // Gestion des vues
+    document.querySelectorAll('.view-toggle button').forEach(button => {
+        button.addEventListener('click', function() {
+            const view = this.dataset.view;
+            document.querySelectorAll('.view-toggle button').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            document.querySelectorAll('.card-view, .map-view').forEach(el => el.classList.remove('active-view'));
+            document.getElementById(`${view}-view`).classList.add('active-view');
+            
+            if (view === 'map' && !map) {
+                initMap();
+                updateMapMarkers(allPlaces);
+            }
+        });
+    });
+
+    // Mise à jour des marqueurs sur la carte
+    function updateMapMarkers(places) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        places.forEach(place => {
+            if (place.latitude && place.longitude) {
+                const marker = L.marker([place.latitude, place.longitude])
+                    .bindPopup(`
+                        <strong>${place.name}</strong><br>
+                        ${place.type}<br>
+                        ${place.adresse}<br>
+                        Note: ${place.averageRating.toFixed(1)}/5
+                    `);
+                markers.push(marker);
+                marker.addTo(map);
+            }
+        });
+
+        if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+
+    // Charger les avis de l'utilisateur connecté
+    fetch('/api/reviews', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+    })
+    .then(r => r.json())
+    .then(reviews => {
+        userReviews = reviews;
+        loadPlaces();
+    });
+
+    // Charger les établissements
+    function loadPlaces() {
+        fetch('/api/places', {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        })
+        .then(response => response.json())
+        .then(data => {
+            allPlaces = data;
+            filterAndRenderPlaces();
+        });
+    }
+
+    // Filtrer et afficher les établissements
+    function filterAndRenderPlaces() {
+        let filtered = allPlaces;
+        if (filterName.value) {
+            filtered = filtered.filter(p => p.name.toLowerCase().includes(filterName.value.toLowerCase()));
+        }
+        if (filterType.value) {
+            filtered = filtered.filter(p => p.type === filterType.value);
+        }
+        renderPlaces(filtered);
+        if (map) {
+            updateMapMarkers(filtered);
+        }
+    }
+
+    // Afficher le tableau
+    function renderPlaces(places) {
+        tbody.innerHTML = '';
+        if (places.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Aucun établissement validé pour le moment.</td></tr>';
+        } else {
+            places.forEach(place => {
+                const alreadyReviewed = userReviews.some(r => r.place.id == place.id);
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${place.name}</td>
+                        <td>${place.type}</td>
+                        <td>${place.adresse}</td>
+                        <td>${place.description.length > 40 ? place.description.substring(0, 40) + '...' : place.description}</td>
+                        <td>
+                            <span class="text-warning">${'★'.repeat(Math.round(place.averageRating))}${'☆'.repeat(5 - Math.round(place.averageRating))}</span>
+                            <span class="ms-1">${place.averageRating.toFixed(1)}</span>
+                        </td>
+                        <td>${place.reviewCount}</td>
+                        <td>${place.createAt ? new Date(place.createAt).toLocaleDateString() : ''}</td>
+                        <td>
+                            ${alreadyReviewed
+                                ? '<span class="badge bg-success">Déjà noté</span>'
+                                : `<a href="/reviews/add?place_id=${place.id}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-star"></i> Noter
+                                </a>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    }
+
+    filterName.addEventListener('input', filterAndRenderPlaces);
+    filterType.addEventListener('change', filterAndRenderPlaces);
+});
+</script>
+{% endblock %}

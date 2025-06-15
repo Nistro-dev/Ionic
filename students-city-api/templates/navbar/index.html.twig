@@ -1,0 +1,64 @@
+<div class="sidebar bg-white border-end vh-100" style="width: 220px;">
+    <div class="p-3">
+        <div class="d-flex align-items-center mb-4">
+            <i class="fas fa-graduation-cap me-2"></i>
+            <span class="fw-bold fs-5">Students City</span>
+        </div>
+        <ul class="nav flex-column">
+            {% set profile_path = path('profile', {}, false) %}
+            {% set places_path = path('places', {}, false) %}
+            {% set reviews_path = path('reviews', {}, false) %}
+            {% set admin_users_path = path('admin_users', {}, false) %}
+            {% set admin_places_path = path('admin_places', {}, false) %}
+            {% set admin_reviews_path = path('admin_reviews', {}, false) %}
+
+            <li class="nav-item mb-2">
+                <a href="{{ profile_path }}" class="nav-link {% if app.request.get('_route') == 'profile' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                    <i class="fas fa-user me-2"></i>
+                    Profil
+                </a>
+            </li>
+
+            {% if is_granted('ROLE_ADMIN') %}
+                <li class="nav-item mb-2">
+                    <a href="{{ admin_users_path }}" class="nav-link {% if app.request.get('_route') == 'admin_users' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                        <i class="fas fa-users me-2"></i>
+                        Gestion des utilisateurs
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ admin_places_path }}" class="nav-link {% if app.request.get('_route') == 'admin_places' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                        <i class="fas fa-building me-2"></i>
+                        Gestion des établissements
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ admin_reviews_path }}" class="nav-link {% if app.request.get('_route') == 'admin_reviews' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                        <i class="fas fa-star me-2"></i>
+                        Gestion des avis
+                    </a>
+                </li>
+            {% else %}
+                <li class="nav-item mb-2">
+                    <a href="{{ places_path }}" class="nav-link {% if app.request.get('_route') == 'places' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                        <i class="fas fa-building me-2"></i>
+                        Établissements
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{{ reviews_path }}" class="nav-link {% if app.request.get('_route') == 'reviews' %}active bg-light text-dark rounded{% else %}text-dark{% endif %}">
+                        <i class="fas fa-comments me-2"></i>
+                        Avis & Notes
+                    </a>
+                </li>
+            {% endif %}
+            
+            <li class="nav-item mt-auto">
+                <a href="{{ path('app_logout') }}" class="nav-link text-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Déconnexion
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

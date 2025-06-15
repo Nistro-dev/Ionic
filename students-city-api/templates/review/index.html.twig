@@ -1,0 +1,189 @@
+{% extends 'layouts/with_navbar.html.twig' %}
+
+{% block title %}Avis & Notations{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <h1 class="h4 mt-3 mb-1">Avis & Notations</h1>
+    <div class="text-muted mb-3" style="margin-top:-5px;">Gestion de vos commentaires et évaluations</div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form class="row g-2 align-items-end" id="filter-form" autocomplete="off">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="filter-etab" placeholder="Rechercher...">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="filter-author" placeholder="Nom de l'étudiant" disabled>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filter-rating">
+                        <option value="">Toutes les notes</option>
+                        <option value="5">5 étoiles</option>
+                        <option value="4">4 étoiles et +</option>
+                        <option value="3">3 étoiles et +</option>
+                        <option value="2">2 étoiles et +</option>
+                        <option value="1">1 étoile et +</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filter-status" disabled>
+                        <option value="">Tous</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Établissement</th>
+                        <th>Note</th>
+                        <th>Commentaire</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reviews-tbody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Chargement...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="pagination" class="mt-2"></div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewsTbody = document.getElementById('reviews-tbody');
+    const filterEtab = document.getElementById('filter-etab');
+    const filterRating = document.getElementById('filter-rating');
+    let allReviews = [];
+
+    function renderTable(reviews) {
+        reviewsTbody.innerHTML = '';
+        if (reviews.length === 0) {
+            reviewsTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Aucun avis pour le moment.</td></tr>';
+        } else {
+            reviews.forEach(review => {
+                reviewsTbody.innerHTML += `
+                    <tr data-id="${review.id}">
+                        <td>${review.place.name}</td>
+                        <td>
+                            <span class="text-warning">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+                            <span class="ms-1">${review.rating}.0</span>
+                        </td>
+                        <td class="review-comment">${review.commentaire.length > 40 ? review.commentaire.substring(0, 40) + '...' : review.commentaire}</td>
+                        <td>${review.createAt ? new Date(review.createAt).toLocaleDateString() : ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary edit-review" title="Modifier"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger delete-review" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        attachReviewActions();
+    }
+
+    function filterAndRender() {
+        let filtered = allReviews;
+        const etab = filterEtab.value.toLowerCase();
+        const minRating = parseInt(filterRating.value) || 0;
+
+        if (etab) {
+            filtered = filtered.filter(r => r.place.name.toLowerCase().includes(etab));
+        }
+        if (minRating) {
+            filtered = filtered.filter(r => r.rating >= minRating);
+        }
+        renderTable(filtered);
+    }
+
+    function loadReviews() {
+        reviewsTbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Chargement...</td></tr>';
+        fetch('/api/reviews', {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+        })
+        .then(r => r.json())
+        .then(data => {
+            allReviews = data;
+            filterAndRender();
+        });
+    }
+
+    function attachReviewActions() {
+        reviewsTbody.querySelectorAll('.edit-review').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tr = btn.closest('tr');
+                const id = tr.dataset.id;
+                const currentComment = tr.querySelector('.review-comment').textContent;
+                const currentRating = tr.querySelector('.text-warning').textContent.length;
+
+                tr.innerHTML = `
+                    <td colspan="5">
+                        <form class="edit-review-form d-flex align-items-center gap-2">
+                            <input type="number" min="1" max="5" value="${currentRating}" class="form-control form-control-sm" style="width:80px;" required>
+                            <input type="text" value="${currentComment}" class="form-control form-control-sm" style="width:300px;" maxlength="255" required>
+                            <button type="submit" class="btn btn-sm btn-success">Enregistrer</button>
+                            <button type="button" class="btn btn-sm btn-secondary cancel-edit">Annuler</button>
+                        </form>
+                    </td>
+                `;
+                tr.querySelector('.cancel-edit').onclick = () => loadReviews();
+                tr.querySelector('.edit-review-form').onsubmit = function(e) {
+                    e.preventDefault();
+                    const rating = this.querySelector('input[type=number]').value;
+                    const commentaire = this.querySelector('input[type=text]').value;
+                    fetch('/api/reviews/' + id, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+                        },
+                        body: JSON.stringify({ rating, commentaire })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadReviews();
+                        } else {
+                            alert(data.message || 'Erreur lors de la modification');
+                        }
+                    });
+                };
+            });
+        });
+
+        reviewsTbody.querySelectorAll('.delete-review').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!confirm('Supprimer cet avis ?')) return;
+                const id = btn.closest('tr').dataset.id;
+                fetch('/api/reviews/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        loadReviews();
+                    } else {
+                        alert(data.message || 'Erreur lors de la suppression');
+                    }
+                });
+            });
+        });
+    }
+
+    // Initialisation
+    loadReviews();
+    filterEtab.addEventListener('input', filterAndRender);
+    filterRating.addEventListener('change', filterAndRender);
+});
+</script>
+{% endblock %}

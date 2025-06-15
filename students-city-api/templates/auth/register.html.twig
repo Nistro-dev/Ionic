@@ -1,0 +1,111 @@
+{# templates/auth/register.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0 text-center">Créer un compte</h1>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'id': 'registerForm'}}) }}
+                        {% if error is defined and error %}
+                            <div class="alert alert-danger">
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.vars.id }}" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            {{ form_errors(form.email) }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.pseudo.vars.id }}" class="form-label">Pseudo</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form_widget(form.pseudo, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            {{ form_errors(form.pseudo) }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.password.vars.id }}" class="form-label">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            {{ form_errors(form.password) }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus me-2"></i>S'inscrire
+                        </button>
+                    {{ form_end(form) }}
+
+                    <div class="text-center mt-3">
+                        <a href="{{ path('app_login') }}" class="text-decoration-none">
+                            <i class="fas fa-sign-in-alt me-2"></i>Déjà un compte ? Se connecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Inscription en cours...';
+        
+        const data = {
+            email: form.querySelector('[name$="[email]"]').value,
+            pseudo: form.querySelector('[name$="[pseudo]"]').value,
+            password: form.querySelector('[name$="[password]"]').value
+        };
+
+        fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem('jwt_token', data.token);
+                window.location.href = '/profile';
+            } else {
+                throw new Error(data.message || 'Erreur lors de l\'inscription');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert(error.message || 'Erreur lors de l\'inscription');
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-user-plus me-2"></i>S\'inscrire';
+        });
+    });
+});
+</script>
+{% endblock %}

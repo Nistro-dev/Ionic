@@ -1,0 +1,164 @@
+{% extends 'layouts/with_navbar.html.twig' %}
+
+{% block title %}Gestion des avis{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <h1 class="h4 mt-3 mb-3">Gestion des avis</h1>
+    <div id="flash-messages"></div>
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Établissement</th>
+                        <th>Note</th>
+                        <th>Commentaire</th>
+                        <th>Auteur</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for review in reviews %}
+                    <tr id="review-{{ review.id }}">
+                        <td>{{ review.place.name }}</td>
+                        <td>
+                            <span class="text-warning">
+                                {% for i in 1..review.rating %}★{% endfor %}
+                                {% for i in (review.rating + 1)..5 %}<span class="text-secondary">★</span>{% endfor %}
+                            </span>
+                            <span class="ms-1">{{ review.rating }}.0</span>
+                        </td>
+                        <td>{{ review.commentaire|length > 40 ? review.commentaire|slice(0,40) ~ '...' : review.commentaire }}</td>
+                        <td>{{ review.user.pseudo }}</td>
+                        <td>{{ review.createAt ? review.createAt|date('d/m/Y') : '' }}</td>
+                        <td>
+                            <span class="status badge {% if review.statut == 'approuvé' %}bg-success{% elseif review.statut == 'en attente' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ review.statut }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button onclick="deleteReview({{ review.id }})" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Aucun avis trouvé.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function showFlashMessage(message, type = 'success') {
+    const flashDiv = document.getElementById('flash-messages');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    flashDiv.appendChild(alert);
+    setTimeout(() => alert.remove(), 5000);
+}
+
+function updateReviewRow(reviewId, statut) {
+    const row = document.getElementById(`review-${reviewId}`);
+    const statusBadge = row.querySelector('.status');
+    const actionsCell = row.querySelector('td:last-child');
+
+    // Mettre à jour le statut
+    statusBadge.className = `status badge ${statut === 'approuvé' ? 'bg-success' : (statut === 'en attente' ? 'bg-warning text-dark' : 'bg-danger')}`;
+    statusBadge.textContent = statut;
+
+    // Mettre à jour les boutons d'action
+    let buttonsHtml = '<div class="btn-group">';
+    if (statut === 'en attente') {
+        buttonsHtml += `<button onclick="approveReview(${reviewId})" class="btn btn-sm btn-success">
+            <i class="fas fa-check"></i> Approuver
+        </button>`;
+        buttonsHtml += `<button onclick="rejectReview(${reviewId})" class="btn btn-sm btn-warning">
+            <i class="fas fa-times"></i> Refuser
+        </button>`;
+    }
+    buttonsHtml += `<button onclick="deleteReview(${reviewId})" class="btn btn-sm btn-danger">
+        <i class="fas fa-trash"></i> Supprimer
+    </button>`;
+    buttonsHtml += '</div>';
+    actionsCell.innerHTML = buttonsHtml;
+}
+
+async function approveReview(reviewId) {
+    try {
+        const response = await fetch(`/api/admin/reviews/${reviewId}/approve`, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
+        });
+        const data = await response.json();
+        if (response.ok) {
+            updateReviewRow(reviewId, 'approuvé');
+            showFlashMessage('Avis approuvé avec succès');
+        } else {
+            throw new Error(data.message || 'Erreur lors de l\'approbation');
+        }
+    } catch (error) {
+        showFlashMessage(error.message, 'danger');
+    }
+}
+
+async function rejectReview(reviewId) {
+    try {
+        const response = await fetch(`/api/admin/reviews/${reviewId}/reject`, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
+        });
+        const data = await response.json();
+        if (response.ok) {
+            updateReviewRow(reviewId, 'refusé');
+            showFlashMessage('Avis refusé avec succès');
+        } else {
+            throw new Error(data.message || 'Erreur lors du refus');
+        }
+    } catch (error) {
+        showFlashMessage(error.message, 'danger');
+    }
+}
+
+async function deleteReview(reviewId) {
+    if (!confirm('Supprimer cet avis ?')) return;
+    try {
+        const response = await fetch(`/api/admin/reviews/${reviewId}`, {
+            method: 'DELETE',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            }
+        });
+        const data = await response.json();
+        if (response.ok) {
+            document.getElementById(`review-${reviewId}`).remove();
+            showFlashMessage('Avis supprimé avec succès', 'danger');
+        } else {
+            throw new Error(data.message || 'Erreur lors de la suppression');
+        }
+    } catch (error) {
+        showFlashMessage(error.message, 'danger');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'layouts/with_navbar.html.twig' %}
+
+{% block title %}Noter un établissement{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h4 mb-0">Noter un établissement</h1>
+                </div>
+                <div class="card-body">
+                    <form id="review-form">
+                        <div class="mb-3">
+                            <label for="place" class="form-label">Établissement</label>
+                            <select id="place" class="form-select" required>
+                                <option value="">Sélectionner...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Note</label>
+                            <select id="rating" class="form-select" required>
+                                <option value="">-</option>
+                                <option value="1">1 ★</option>
+                                <option value="2">2 ★★</option>
+                                <option value="3">3 ★★★</option>
+                                <option value="4">4 ★★★★</option>
+                                <option value="5">5 ★★★★★</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="commentaire" class="form-label">Commentaire</label>
+                            <textarea id="commentaire" class="form-control" maxlength="255" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-star me-2"></i>Ajouter mon avis
+                        </button>
+                        <div id="review-form-message" class="mt-2"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const placeSelect = document.getElementById('place');
+    const form = document.getElementById('review-form');
+    const messageDiv = document.getElementById('review-form-message');
+    let userReviews = [];
+
+    // Charger les avis de l'utilisateur connecté
+    fetch('/api/reviews', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+    })
+    .then(r => r.json())
+    .then(data => {
+        userReviews = data;
+    });
+
+    // Charger la liste des établissements validés
+    fetch('/api/places', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('jwt_token') }
+    })
+    .then(r => r.json())
+    .then(data => {
+        data.forEach(place => {
+            const opt = document.createElement('option');
+            opt.value = place.id;
+            opt.textContent = place.name;
+            placeSelect.appendChild(opt);
+        });
+        // Pré-sélection si place_id dans l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const preselectId = urlParams.get('place_id');
+        if (preselectId) {
+            placeSelect.value = preselectId;
+            placeSelect.disabled = true; // Optionnel : empêcher de changer
+        }
+        checkIfAlreadyReviewed();
+    });
+
+    // Vérifie si l'utilisateur a déjà noté l'établissement sélectionné
+    function checkIfAlreadyReviewed() {
+        const selectedPlace = placeSelect.value;
+        const already = userReviews.find(r => r.place.id == selectedPlace);
+        if (already) {
+            form.querySelector('button[type="submit"]').disabled = true;
+            messageDiv.textContent = 'Vous avez déjà noté cet établissement.';
+            messageDiv.className = 'text-warning';
+        } else {
+            form.querySelector('button[type="submit"]').disabled = false;
+            messageDiv.textContent = '';
+        }
+    }
+    placeSelect.addEventListener('change', checkIfAlreadyReviewed);
+
+    // Soumission du formulaire
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        messageDiv.textContent = '';
+        const place_id = placeSelect.value;
+        const rating = document.getElementById('rating').value;
+        const commentaire = document.getElementById('commentaire').value;
+
+        if (!place_id || !rating || !commentaire) {
+            messageDiv.textContent = 'Tous les champs sont obligatoires.';
+            messageDiv.className = 'text-danger';
+            return;
+        }
+
+        fetch('/api/reviews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+            },
+            body: JSON.stringify({ place_id, rating, commentaire })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                messageDiv.textContent = 'Avis ajouté avec succès !';
+                messageDiv.className = 'text-success';
+                form.reset();
+                if (placeSelect.disabled) {
+                    setTimeout(() => window.location.href = '/reviews', 1000);
+                }
+            } else {
+                messageDiv.textContent = data.message || 'Erreur lors de l\'ajout de l\'avis.';
+                messageDiv.className = 'text-danger';
+            }
+        })
+        .catch(() => {
+            messageDiv.textContent = 'Erreur lors de la requête.';
+            messageDiv.className = 'text-danger';
+        });
+    });
+});
+</script>
+{% endblock %}

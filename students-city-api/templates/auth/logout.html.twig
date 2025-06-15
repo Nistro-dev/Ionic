@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Déconnexion{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Supprimer le token JWT du localStorage
+    localStorage.removeItem('jwt_token');
+    
+    // Supprimer toutes les données de session
+    sessionStorage.clear();
+    
+    // Rediriger vers la page de connexion après un court délai
+    setTimeout(function() {
+        window.location.href = '{{ redirect_url }}';
+    }, 1000);
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0 text-center">Déconnexion</h1>
+                </div>
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p>Vous êtes en train de vous déconnecter...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

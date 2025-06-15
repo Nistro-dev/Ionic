@@ -1,0 +1,406 @@
+{
+	"info": {
+		"_postman_id": "students-city-api",
+		"name": "Students City API Benjamin Fouché",
+		"description": "Collection pour l'API Students City Benjamin Fouché", 
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentification",
+			"item": [
+				{
+					"name": "Inscription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pseudo\": \"example\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "register"]
+						}
+					}
+				},
+				{
+					"name": "Connexion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						}
+							}
+						}
+					]
+		},
+		{
+			"name": "Lieux",
+			"item": [
+				{
+					"name": "Lister tous les lieux",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/places",
+							"host": ["{{base_url}}"],
+							"path": ["api", "places"]
+						}
+					}
+				},
+				{
+					"name": "Obtenir un lieu",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/places/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "places", "1"]
+						}
+					}
+				},
+				{
+					"name": "Créer un lieu",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Nom du lieu\",\n    \"description\": \"Description du lieu\",\n    \"address\": \"Adresse du lieu\",\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/places",
+							"host": ["{{base_url}}"],
+							"path": ["api", "places"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Avis",
+			"item": [
+				{
+					"name": "Lister tous les avis",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews"]
+						}
+					}
+				},
+				{
+					"name": "Obtenir un avis",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "1"]
+						}
+					}
+				},
+				{
+					"name": "Ajouter un avis",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"place\": 1,\n    \"rating\": 4,\n    \"comment\": \"Excellent endroit !\",\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews"]
+						}
+					}
+				},
+				{
+					"name": "Modifier un avis",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 5,\n    \"comment\": \"Commentaire modifié\",\n    \"title\": \"Nouveau titre\",\n    \"visitDate\": \"2024-03-21\",\n    \"photos\": [\"url3\", \"url4\"],\n    \"pros\": [\"Nouvelle ambiance\", \"Service rapide\"],\n    \"cons\": [\"Parking\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "1"]
+						}
+					}
+				},
+				{
+					"name": "Supprimer un avis",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Profil",
+			"item": [
+				{
+					"name": "Modifier son profil",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pseudo\": \"nouveau_pseudo\",\n    \"email\": \"nouveau@email.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Administration",
+			"item": [
+				{
+					"name": "Utilisateurs",
+					"item": [
+						{
+							"name": "Lister tous les utilisateurs",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/users",
+									"host": ["{{base_url}}"],
+									"path": ["api", "users"]
+								}
+							}
+						},
+						{
+							"name": "Modifier un utilisateur",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"roles\": [\"ROLE_ADMIN\"]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/users/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "users", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Lieux",
+					"item": [
+						{
+							"name": "Approuver un lieu",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/places/1/approve",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "places", "1", "approve"]
+								}
+							}
+						},
+						{
+							"name": "Rejeter un lieu",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/places/1/revoke",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "places", "1", "revoke"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Avis",
+					"item": [
+						{
+							"name": "Modérer un avis",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"approved\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/reviews/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "reviews", "1"]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+} 

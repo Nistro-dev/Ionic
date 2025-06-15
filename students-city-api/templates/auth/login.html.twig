@@ -1,0 +1,173 @@
+{# templates/security/login.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block javascripts %}
+<script>
+// Fonction pour ajouter le token JWT aux requêtes
+function addAuthHeader(headers) {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
+// Intercepteur pour ajouter le token JWT à toutes les requêtes fetch
+const originalFetch = window.fetch;
+window.fetch = function(url, options = {}) {
+    options.headers = options.headers || {};
+    if (url.startsWith('/api/') || url.startsWith('/profile')) {
+        options.headers = addAuthHeader(options.headers);
+    }
+    return originalFetch(url, options);
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('login-error');
+            const successDiv = document.getElementById('login-success');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connexion en cours...';
+            
+            const data = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            console.log('Tentative de connexion...');
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-Token': document.querySelector('input[name="_csrf_token"]').value
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                console.log('Réponse reçue:', response.status);
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Erreur de connexion');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Données reçues:', data);
+                if (data.token) {
+                    localStorage.setItem('jwt_token', data.token);
+                    successDiv.textContent = 'Connexion réussie ! Redirection...';
+                    successDiv.style.display = 'block';
+                    
+                    const redirectUrl = data.redirect || '/profile';
+                    console.log('URL de redirection:', redirectUrl);
+                    
+                    // Vérifier l'accès à la page de profil avant la redirection
+                    fetch(redirectUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${data.token}`,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        console.log('Vérification de l\'accès au profil:', response.status);
+                        if (response.ok) {
+                            console.log('Redirection vers:', redirectUrl);
+                            window.location.href = redirectUrl;
+                        } else {
+                            throw new Error('Accès au profil refusé');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la vérification du profil:', error);
+                        errorDiv.textContent = 'Erreur lors de la redirection. Veuillez réessayer.';
+                        errorDiv.style.display = 'block';
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Se connecter';
+                    });
+                } else {
+                    throw new Error('Token non reçu');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la connexion:', error);
+                errorDiv.textContent = error.message || 'Erreur de connexion. Veuillez vérifier vos identifiants.';
+                errorDiv.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Se connecter';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0 text-center">Connexion</h1>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="loginForm">
+                        {% if error %}
+                            <div class="alert alert-danger">
+                                {% if error.messageKey == 'Invalid credentials.' %}
+                                    Email ou mot de passe incorrect.
+                                {% else %}
+                                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <div id="login-error" class="alert alert-danger" style="display: none;"></div>
+                        <div id="login-success" class="alert alert-success" style="display: none;"></div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" id="email" name="email" class="form-control" required autofocus value="{{ last_username }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" id="password" name="password" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <button class="btn btn-primary w-100 mt-3" type="submit">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="{{ path('app_register') }}" class="text-decoration-none">
+                            <i class="fas fa-user-plus me-2"></i>Pas encore de compte ? S'inscrire
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
