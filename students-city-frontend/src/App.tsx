@@ -5,6 +5,8 @@ import {
 import { AuthProvider } from './contexts/AuthContext';
 import { NetworkProvider } from './contexts/NetworkContext';
 import AppContent from './components/AppContent';
+import SplashScreen from './components/SplashScreen';
+import { useSplashScreen } from './hooks/useSplashScreen';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -37,14 +39,23 @@ import './theme/luxury.css';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <NetworkProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </NetworkProvider>
-  </IonApp>
-);
+const App: React.FC = () => {
+  const { isVisible, hideSplash } = useSplashScreen();
+
+  return (
+    <IonApp>
+      <NetworkProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </NetworkProvider>
+      
+      <SplashScreen 
+        isVisible={isVisible} 
+        onHide={hideSplash}
+      />
+    </IonApp>
+  );
+};
 
 export default App;

@@ -1,0 +1,56 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cercle de fond -->
+  <circle cx="100" cy="100" r="90" fill="#3880ff" stroke="#2d6ef0" stroke-width="4"/>
+  
+  <!-- Bâtiments stylisés -->
+  <rect x="40" y="120" width="20" height="40" fill="#ffffff" opacity="0.9"/>
+  <rect x="65" y="110" width="20" height="50" fill="#ffffff" opacity="0.9"/>
+  <rect x="90" y="100" width="20" height="60" fill="#ffffff" opacity="0.9"/>
+  <rect x="115" y="105" width="20" height="55" fill="#ffffff" opacity="0.9"/>
+  <rect x="140" y="115" width="20" height="45" fill="#ffffff" opacity="0.9"/>
+  
+  <!-- Fenêtres des bâtiments -->
+  <rect x="43" y="125" width="4" height="4" fill="#3880ff"/>
+  <rect x="50" y="125" width="4" height="4" fill="#3880ff"/>
+  <rect x="43" y="135" width="4" height="4" fill="#3880ff"/>
+  <rect x="50" y="135" width="4" height="4" fill="#3880ff"/>
+  
+  <rect x="68" y="115" width="4" height="4" fill="#3880ff"/>
+  <rect x="75" y="115" width="4" height="4" fill="#3880ff"/>
+  <rect x="68" y="125" width="4" height="4" fill="#3880ff"/>
+  <rect x="75" y="125" width="4" height="4" fill="#3880ff"/>
+  <rect x="68" y="135" width="4" height="4" fill="#3880ff"/>
+  <rect x="75" y="135" width="4" height="4" fill="#3880ff"/>
+  
+  <rect x="93" y="105" width="4" height="4" fill="#3880ff"/>
+  <rect x="100" y="105" width="4" height="4" fill="#3880ff"/>
+  <rect x="93" y="115" width="4" height="4" fill="#3880ff"/>
+  <rect x="100" y="115" width="4" height="4" fill="#3880ff"/>
+  <rect x="93" y="125" width="4" height="4" fill="#3880ff"/>
+  <rect x="100" y="125" width="4" height="4" fill="#3880ff"/>
+  <rect x="93" y="135" width="4" height="4" fill="#3880ff"/>
+  <rect x="100" y="135" width="4" height="4" fill="#3880ff"/>
+  
+  <rect x="118" y="110" width="4" height="4" fill="#3880ff"/>
+  <rect x="125" y="110" width="4" height="4" fill="#3880ff"/>
+  <rect x="118" y="120" width="4" height="4" fill="#3880ff"/>
+  <rect x="125" y="120" width="4" height="4" fill="#3880ff"/>
+  <rect x="118" y="130" width="4" height="4" fill="#3880ff"/>
+  <rect x="125" y="130" width="4" height="4" fill="#3880ff"/>
+  
+  <rect x="143" y="120" width="4" height="4" fill="#3880ff"/>
+  <rect x="150" y="120" width="4" height="4" fill="#3880ff"/>
+  <rect x="143" y="130" width="4" height="4" fill="#3880ff"/>
+  <rect x="150" y="130" width="4" height="4" fill="#3880ff"/>
+  
+  <!-- Icône étudiants (chapeau de graduation) -->
+  <circle cx="100" cy="70" r="15" fill="#ffffff"/>
+  <rect x="85" y="55" width="30" height="8" rx="4" fill="#ffffff"/>
+  <circle cx="110" cy="59" r="3" fill="#ffffff"/>
+  
+  <!-- Texte Students -->
+  <text x="100" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Students</text>
+  
+  <!-- Texte City -->
+  <text x="100" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#3880ff">City</text>
+</svg>

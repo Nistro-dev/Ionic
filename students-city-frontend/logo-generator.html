@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Logo Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="downloadLogo(256)">Télécharger 256x256</button>
+    <button onclick="downloadLogo(512)">Télécharger 512x512</button>
+    <button onclick="downloadLogo(1024)">Télécharger 1024x1024</button>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawLogo(size) {
+            const scale = size / 200;
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            ctx.clearRect(0, 0, size, size);
+            ctx.save();
+            ctx.scale(scale, scale);
+            
+            // Cercle de fond
+            ctx.beginPath();
+            ctx.arc(100, 100, 90, 0, 2 * Math.PI);
+            ctx.fillStyle = '#3880ff';
+            ctx.fill();
+            ctx.strokeStyle = '#2d6ef0';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // Bâtiments
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(40, 120, 20, 40);
+            ctx.fillRect(65, 110, 20, 50);
+            ctx.fillRect(90, 100, 20, 60);
+            ctx.fillRect(115, 105, 20, 55);
+            ctx.fillRect(140, 115, 20, 45);
+            
+            // Fenêtres (simplifiées pour la lisibilité)
+            ctx.fillStyle = '#3880ff';
+            const windows = [
+                [43, 125], [50, 125], [43, 135], [50, 135],
+                [68, 115], [75, 115], [68, 125], [75, 125],
+                [93, 105], [100, 105], [93, 115], [100, 115],
+                [118, 110], [125, 110], [118, 120], [125, 120],
+                [143, 120], [150, 120], [143, 130], [150, 130]
+            ];
+            
+            windows.forEach(([x, y]) => {
+                ctx.fillRect(x, y, 4, 4);
+            });
+            
+            // Chapeau de graduation
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(100, 70, 15, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.roundRect(85, 55, 30, 8, 4);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(110, 59, 3, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Texte
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Students', 100, 45);
+            
+            ctx.fillStyle = '#3880ff';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('City', 100, 185);
+            
+            ctx.restore();
+        }
+        
+        function downloadLogo(size) {
+            drawLogo(size);
+            const link = document.createElement('a');
+            link.download = `students-city-logo-${size}x${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Dessiner le logo initial
+        drawLogo(512);
+    </script>
+</body>
+</html>
