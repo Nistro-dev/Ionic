@@ -8,10 +8,16 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ isVisible, onHide }) => {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(true);
 
   useEffect(() => {
-    if (!isVisible && isAnimating) {
+    if (!isVisible && !isAnimating) {
+      // Démarrer l'animation de fade-out
+      setIsAnimating(true);
+      
+      // Retirer complètement le composant après l'animation
       const timer = setTimeout(() => {
+        setShouldRender(false);
         onHide();
       }, 500);
 
@@ -19,19 +25,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ isVisible, onHide }) => {
     }
   }, [isVisible, isAnimating, onHide]);
 
-  useEffect(() => {
-    if (isVisible) {
-      setIsAnimating(true);
-
-      const timer = setTimeout(() => {
-        setIsAnimating(false);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible]);
-
-  if (!isVisible && !isAnimating) return null;
+  // Ne pas rendre le composant s'il ne doit plus être affiché
+  if (!shouldRender) return null;
 
   return (
     <div className={`splash-screen ${!isVisible ? "fade-out" : ""}`}>
