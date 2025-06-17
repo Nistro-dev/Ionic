@@ -46,6 +46,17 @@ const Dashboard: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <IonButton
                   expand="block"
+                  routerLink="/places"
+                  style={{ 
+                    '--background': 'var(--luxury-gradient)',
+                    '--color': 'white'
+                  }}
+                >
+                  Établissements
+                </IonButton>
+                
+                <IonButton
+                  expand="block"
                   routerLink="/profile"
                   style={{ 
                     '--background': 'var(--luxury-gradient)',

@@ -10,6 +10,13 @@
   --luxury-border: #333333;
   --luxury-shadow: rgba(0, 0, 0, 0.5);
   --luxury-gradient: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+
+  /* Couleurs étendues pour les nouveaux composants */
+  --luxury-success-light: #d4edda;
+  --luxury-success-dark: #155724;
+  --luxury-warning-light: #fff3cd;
+  --luxury-warning-dark: #856404;
+  --luxury-text-tertiary: #6c757d;
 }
 
 * {

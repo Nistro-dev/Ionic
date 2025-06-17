@@ -32,7 +32,7 @@ class AdminUserApiController extends AbstractController
         return $this->json($userData);
     }
 
-    #[Route('/api/admin/users/{id}/approve', name: 'api_admin_user_approve', methods: ['POST'])]
+    #[Route('/api/admin/users/{id}/approve', name: 'api_admin_user_approve', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function approve(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -44,7 +44,7 @@ class AdminUserApiController extends AbstractController
         return $this->json(['success' => true]);
     }
 
-    #[Route('/api/admin/users/{id}/revoke', name: 'api_admin_user_revoke', methods: ['POST'])]
+    #[Route('/api/admin/users/{id}/revoke', name: 'api_admin_user_revoke', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function revoke(int $id, EntityManagerInterface $em): JsonResponse
     {
@@ -56,7 +56,7 @@ class AdminUserApiController extends AbstractController
         return $this->json(['success' => true]);
     }
 
-    #[Route('/api/admin/users/{id}/delete', name: 'api_admin_user_delete', methods: ['DELETE'])]
+    #[Route('/api/admin/users/{id}/delete', name: 'api_admin_user_delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, EntityManagerInterface $em): JsonResponse
     {

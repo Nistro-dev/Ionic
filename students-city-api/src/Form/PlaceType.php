@@ -57,6 +57,7 @@ class PlaceType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Place::class,
+            'csrf_protection' => false,
         ]);
     }
 } 

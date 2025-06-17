@@ -11,6 +11,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import Places from './pages/Places';
+import AddPlace from './pages/AddPlace';
+import PlaceDetail from './pages/PlaceDetail';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -56,6 +59,9 @@ const App: React.FC = () => (
           </Route>
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
           <PrivateRoute exact path="/profile" component={Profile} />
+          <PrivateRoute exact path="/places" component={Places} />
+          <PrivateRoute exact path="/places/add" component={AddPlace} />
+          <PrivateRoute exact path="/places/:id" component={PlaceDetail} />
           <Route exact path="/">
             <Redirect to="/dashboard" />
           </Route>
