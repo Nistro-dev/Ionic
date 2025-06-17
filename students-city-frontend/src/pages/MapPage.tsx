@@ -211,27 +211,6 @@ const MapPage: React.FC = () => {
             trouvé{filteredPlaces.length > 1 ? "s" : ""}
             {userPosition && " • Position activée"}
           </p>
-          {filteredPlaces.length > 0 && (
-            <details
-              style={{ fontSize: "0.8rem", color: "#666", marginTop: "8px" }}
-            >
-              <summary>Debug: Premiers lieux</summary>
-              <ul
-                style={{
-                  fontSize: "0.7rem",
-                  maxHeight: "100px",
-                  overflow: "auto",
-                }}
-              >
-                {filteredPlaces.slice(0, 3).map((place) => (
-                  <li key={place.id}>
-                    {place.name} - {place.type} - Lat: {place.latitude}, Lng:{" "}
-                    {place.longitude}
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
         </div>
 
         <div className="map-container">

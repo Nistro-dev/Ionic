@@ -56,11 +56,21 @@ const Login: React.FC = () => {
 
     setIsSubmitting(true);
     try {
+      console.log('Tentative de connexion avec:', { email });
       await login(email, password);
       setShowToast(true);
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Email ou mot de passe incorrect";
+      console.error('Erreur de connexion:', err);
+      let errorMessage = "Erreur de connexion";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        // Afficher plus de détails pour les erreurs réseau
+        if (err.message.includes('Network Error') || err.message.includes('ERR_NETWORK')) {
+          errorMessage = "Erreur réseau - Impossible de contacter le serveur";
+        }
+      }
+      
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);

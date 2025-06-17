@@ -1,7 +1,18 @@
 import axios from "axios";
 import { localCache } from "./localCache";
+import { Capacitor } from "@capacitor/core";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+// Configuration de l'URL API selon l'environnement
+const getApiUrl = () => {
+  // Pour l'émulateur iOS, utiliser localhost car il accède au localhost de la machine hôte
+  if (Capacitor.isNativePlatform()) {
+    return "http://localhost:8000/api";
+  }
+  // Sinon utiliser la variable d'environnement ou localhost
+  return import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
@@ -96,13 +107,15 @@ class PlaceService {
     }
 
     try {
-      const response = await api.get("/places");
+      console.log('Récupération des lieux depuis:', `${API_URL}/public/places`);
+      const response = await api.get("/public/places");
       const places = response.data;
 
       localCache.set(cacheKey, places, 30 * 60 * 1000);
 
       return places;
     } catch (error) {
+      console.error('Erreur lors de la récupération des lieux:', error);
       const cachedPlaces = localCache.get<Place[]>(cacheKey);
       if (cachedPlaces) {
         console.warn("Utilisation du cache suite à une erreur réseau");

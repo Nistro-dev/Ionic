@@ -1,6 +1,20 @@
 import axios from "axios";
+import { Capacitor } from "@capacitor/core";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+// Configuration de l'URL API selon l'environnement
+const getApiUrl = () => {
+  // Pour l'émulateur iOS, utiliser localhost car il accède au localhost de la machine hôte
+  // Pour un vrai device, il faudrait l'IP locale ou ngrok
+  if (Capacitor.isNativePlatform()) {
+    // Vérifier si on est dans un émulateur ou un vrai device
+    // Pour l'instant, on utilise localhost pour l'émulateur
+    return "http://localhost:8000/api";
+  }
+  // Sinon utiliser la variable d'environnement ou localhost
+  return import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
@@ -75,8 +89,18 @@ export interface RegisterResponse {
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await api.post("/login", credentials);
-    return response.data;
+    console.log('authService.login appelé avec URL:', API_URL);
+    console.log('Capacitor.isNativePlatform():', Capacitor.isNativePlatform());
+    console.log('URL complète de login:', `${API_URL}/login`);
+    
+    try {
+      const response = await api.post("/login", credentials);
+      console.log('Réponse de login reçue:', response.status);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur dans authService.login:', error);
+      throw error;
+    }
   },
 
   register: async (data: RegisterData): Promise<RegisterResponse> => {

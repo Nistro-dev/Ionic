@@ -82,6 +82,28 @@ class PlaceApiController extends AbstractController
         return $this->json($data);
     }
 
+    #[Route('/api/public/places', name: 'api_public_places_list', methods: ['GET'])]
+    public function publicList(EntityManagerInterface $em): JsonResponse
+    {
+        $places = $em->getRepository(Place::class)->findBy(['statut' => self::STATUS_VALIDATED]);
+        $data = [];
+        foreach ($places as $place) {
+            $data[] = [
+                'id' => $place->getId(),
+                'name' => $place->getName(),
+                'type' => $place->getType(),
+                'adresse' => $place->getAdresse(),
+                'description' => $place->getDescription(),
+                'createAt' => $place->getCreateAt()?->format('Y-m-d H:i:s'),
+                'averageRating' => $place->getAverageRating(),
+                'reviewCount' => $place->getReviewCount(),
+                'latitude' => $place->getLatitude(),
+                'longitude' => $place->getLongitude(),
+            ];
+        }
+        return $this->json($data);
+    }
+
     #[Route('/api/places/{id}', name: 'api_place_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function show(string $id, EntityManagerInterface $em): JsonResponse

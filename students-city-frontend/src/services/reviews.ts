@@ -1,7 +1,18 @@
 import axios from "axios";
 import { localCache } from "./localCache";
+import { Capacitor } from "@capacitor/core";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+// Configuration de l'URL API selon l'environnement
+const getApiUrl = () => {
+  // Pour l'émulateur iOS, utiliser localhost car il accède au localhost de la machine hôte
+  if (Capacitor.isNativePlatform()) {
+    return "http://localhost:8000/api";
+  }
+  // Sinon utiliser la variable d'environnement ou localhost
+  return import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
