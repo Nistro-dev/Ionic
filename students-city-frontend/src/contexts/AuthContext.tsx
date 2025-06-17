@@ -1,11 +1,15 @@
-import React, { createContext, useEffect, useState, useMemo } from 'react';
-import { User, authService, RegisterResponse } from '../services/auth';
+import React, { createContext, useEffect, useState, useMemo } from "react";
+import { User, authService, RegisterResponse } from "../services/auth";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (pseudo: string, email: string, password: string) => Promise<RegisterResponse>;
+  register: (
+    pseudo: string,
+    email: string,
+    password: string
+  ) => Promise<RegisterResponse>;
   logout: () => void;
   loading: boolean;
 }
@@ -23,22 +27,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem("authToken");
         const savedUser = authService.getCurrentUser();
-        
+
         if (token && savedUser) {
-          // Vérifier que le token est encore valide
           try {
-            // On pourrait ajouter un appel API pour vérifier le token
             setUser(savedUser);
           } catch {
-            // Token invalide, nettoyer
             authService.logout();
             setUser(null);
           }
         }
       } catch (error) {
-        console.error('Erreur lors de l\'initialisation de l\'auth:', error);
+        console.error("Erreur lors de l'initialisation de l'auth:", error);
         authService.logout();
         setUser(null);
       } finally {
@@ -53,8 +54,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(true);
     try {
       const response = await authService.login({ email, password });
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem("authToken", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
       setUser(response.user);
     } finally {
       setLoading(false);
@@ -65,8 +66,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(true);
     try {
       const response = await authService.register({ pseudo, email, password });
-      // Ne plus essayer de se connecter automatiquement après l'inscription
-      // car le compte est en attente de validation
       return response;
     } finally {
       setLoading(false);
@@ -78,14 +77,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
-  const value = useMemo(() => ({
-    user,
-    isAuthenticated: !!user,
-    login,
-    register,
-    logout,
-    loading,
-  }), [user, loading]);
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      login,
+      register,
+      logout,
+      loading,
+    }),
+    [user, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

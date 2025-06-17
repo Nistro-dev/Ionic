@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   IonContent,
   IonHeader,
@@ -20,53 +20,56 @@ import {
   IonLoading,
   IonBackButton,
   IonButtons,
-} from '@ionic/react';
-import { useHistory } from 'react-router-dom';
-import { placeService, CreatePlaceData } from '../services/places';
-import { geolocationService } from '../services/geolocation';
+} from "@ionic/react";
+import { useHistory } from "react-router-dom";
+import { placeService, CreatePlaceData } from "../services/places";
+import { geolocationService } from "../services/geolocation";
 
 const PLACE_TYPES = [
-  'Restaurant',
-  'Café',
-  'Bar',
-  'Hôtel',
-  'Magasin',
-  'Supermarché',
-  'Pharmacie',
-  'Banque',
-  'École',
-  'Université',
-  'Bibliothèque',
-  'Parc',
-  'Salle de sport',
-  'Cinéma',
-  'Théâtre',
-  'Musée',
-  'Autre'
+  "Restaurant",
+  "Café",
+  "Bar",
+  "Hôtel",
+  "Magasin",
+  "Supermarché",
+  "Pharmacie",
+  "Banque",
+  "École",
+  "Université",
+  "Bibliothèque",
+  "Parc",
+  "Salle de sport",
+  "Cinéma",
+  "Théâtre",
+  "Musée",
+  "Autre",
 ];
 
 const AddPlace: React.FC = () => {
   const [formData, setFormData] = useState<CreatePlaceData>({
-    name: '',
-    type: '',
-    adresse: '',
-    description: '',
+    name: "",
+    type: "",
+    adresse: "",
+    description: "",
     latitude: undefined,
-    longitude: undefined
+    longitude: undefined,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastColor, setToastColor] = useState<"success" | "danger">("success");
 
   const history = useHistory();
 
-  const handleInputChange = (field: keyof CreatePlaceData, value: string | number | undefined) => {
-    setFormData(prev => ({
+  const handleInputChange = (
+    field: keyof CreatePlaceData,
+    value: string | number | undefined
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -74,16 +77,18 @@ const AddPlace: React.FC = () => {
     setIsGettingLocation(true);
     try {
       const position = await geolocationService.getCurrentPosition();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         latitude: position.lat,
-        longitude: position.lon
+        longitude: position.lon,
       }));
-      setToastMessage('Position obtenue avec succès !');
-      setToastColor('success');
+      setToastMessage("Position obtenue avec succès !");
+      setToastColor("success");
       setShowToast(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur de géolocalisation');
+      setError(
+        err instanceof Error ? err.message : "Erreur de géolocalisation"
+      );
     } finally {
       setIsGettingLocation(false);
     }
@@ -91,28 +96,30 @@ const AddPlace: React.FC = () => {
 
   const geocodeAddress = async () => {
     if (!formData.adresse.trim()) {
-      setError('Veuillez entrer une adresse');
+      setError("Veuillez entrer une adresse");
       return;
     }
 
     setIsGettingLocation(true);
     try {
-      const position = await geolocationService.geocodeAddress(formData.adresse);
+      const position = await geolocationService.geocodeAddress(
+        formData.adresse
+      );
       if (position) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           latitude: position.lat,
-          longitude: position.lon
+          longitude: position.lon,
         }));
-        setToastMessage('Coordonnées trouvées pour cette adresse !');
-        setToastColor('success');
+        setToastMessage("Coordonnées trouvées pour cette adresse !");
+        setToastColor("success");
         setShowToast(true);
       } else {
-        setError('Impossible de trouver les coordonnées de cette adresse');
+        setError("Impossible de trouver les coordonnées de cette adresse");
       }
     } catch (err) {
-      console.error('Geocoding error:', err);
-      setError('Erreur lors de la recherche d\'adresse');
+      console.error("Geocoding error:", err);
+      setError("Erreur lors de la recherche d'adresse");
     } finally {
       setIsGettingLocation(false);
     }
@@ -120,27 +127,27 @@ const AddPlace: React.FC = () => {
 
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
-      setError('Le nom est requis');
+      setError("Le nom est requis");
       return false;
     }
     if (!formData.type) {
-      setError('Le type est requis');
+      setError("Le type est requis");
       return false;
     }
     if (!formData.adresse.trim()) {
-      setError('L\'adresse est requise');
+      setError("L'adresse est requise");
       return false;
     }
     if (!formData.description.trim()) {
-      setError('La description est requise');
+      setError("La description est requise");
       return false;
     }
     return true;
   };
 
   const handleSubmit = async () => {
-    setError('');
-    
+    setError("");
+
     if (!validateForm()) {
       return;
     }
@@ -148,20 +155,22 @@ const AddPlace: React.FC = () => {
     setIsSubmitting(true);
     try {
       const response = await placeService.createPlace(formData);
-      
+
       if (response.success) {
         setToastMessage(response.message);
-        setToastColor('success');
+        setToastColor("success");
         setShowToast(true);
-        
+
         setTimeout(() => {
-          history.push('/places');
+          history.push("/places");
         }, 2000);
       } else {
-        setError('Erreur lors de la création de l\'établissement');
+        setError("Erreur lors de la création de l'établissement");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la création');
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de la création"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -179,7 +188,7 @@ const AddPlace: React.FC = () => {
       </IonHeader>
 
       <IonContent className="luxury-content">
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: "16px" }}>
           <IonCard className="luxury-card">
             <IonCardHeader>
               <IonCardTitle className="luxury-title">
@@ -189,16 +198,21 @@ const AddPlace: React.FC = () => {
 
             <IonCardContent>
               {error && (
-                <div className="error-message luxury-error" style={{ marginBottom: '16px' }}>
+                <div
+                  className="error-message luxury-error"
+                  style={{ marginBottom: "16px" }}
+                >
                   {error}
                 </div>
               )}
 
               <IonItem className="luxury-item">
-                <IonLabel position="stacked" className="luxury-label">Nom de l'établissement *</IonLabel>
+                <IonLabel position="stacked" className="luxury-label">
+                  Nom de l'établissement *
+                </IonLabel>
                 <IonInput
                   value={formData.name}
-                  onIonInput={(e) => handleInputChange('name', e.detail.value!)}
+                  onIonInput={(e) => handleInputChange("name", e.detail.value!)}
                   placeholder="Ex: Restaurant Le Gourmet"
                   className="luxury-input"
                   required
@@ -206,32 +220,42 @@ const AddPlace: React.FC = () => {
               </IonItem>
 
               <IonItem className="luxury-item">
-                <IonLabel position="stacked" className="luxury-label">Type d'établissement *</IonLabel>
+                <IonLabel position="stacked" className="luxury-label">
+                  Type d'établissement *
+                </IonLabel>
                 <IonSelect
                   value={formData.type}
-                  onIonChange={(e) => handleInputChange('type', e.detail.value)}
+                  onIonChange={(e) => handleInputChange("type", e.detail.value)}
                   placeholder="Sélectionner un type"
                   interface="popover"
                   className="luxury-select"
                 >
-                  {PLACE_TYPES.map(type => (
-                    <IonSelectOption key={type} value={type}>{type}</IonSelectOption>
+                  {PLACE_TYPES.map((type) => (
+                    <IonSelectOption key={type} value={type}>
+                      {type}
+                    </IonSelectOption>
                   ))}
                 </IonSelect>
               </IonItem>
 
               <IonItem className="luxury-item">
-                <IonLabel position="stacked" className="luxury-label">Adresse *</IonLabel>
+                <IonLabel position="stacked" className="luxury-label">
+                  Adresse *
+                </IonLabel>
                 <IonInput
                   value={formData.adresse}
-                  onIonInput={(e) => handleInputChange('adresse', e.detail.value!)}
+                  onIonInput={(e) =>
+                    handleInputChange("adresse", e.detail.value!)
+                  }
                   placeholder="Ex: 123 Rue de la Paix, 75001 Paris"
                   className="luxury-input"
                   required
                 />
               </IonItem>
 
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <div
+                style={{ display: "flex", gap: "8px", marginBottom: "16px" }}
+              >
                 <IonButton
                   fill="outline"
                   size="small"
@@ -253,22 +277,29 @@ const AddPlace: React.FC = () => {
               </div>
 
               {formData.latitude && formData.longitude && (
-                <div style={{ 
-                  padding: '8px', 
-                  background: 'var(--ion-color-success-tint)',
-                  borderRadius: '4px',
-                  marginBottom: '16px',
-                  fontSize: '0.9em'
-                }}>
-                  📍 Coordonnées: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                <div
+                  style={{
+                    padding: "8px",
+                    background: "var(--ion-color-success-tint)",
+                    borderRadius: "4px",
+                    marginBottom: "16px",
+                    fontSize: "0.9em",
+                  }}
+                >
+                  📍 Coordonnées: {formData.latitude.toFixed(6)},{" "}
+                  {formData.longitude.toFixed(6)}
                 </div>
               )}
 
               <IonItem className="luxury-item">
-                <IonLabel position="stacked" className="luxury-label">Description *</IonLabel>
+                <IonLabel position="stacked" className="luxury-label">
+                  Description *
+                </IonLabel>
                 <IonTextarea
                   value={formData.description}
-                  onIonInput={(e) => handleInputChange('description', e.detail.value!)}
+                  onIonInput={(e) =>
+                    handleInputChange("description", e.detail.value!)
+                  }
                   placeholder="Décrivez brièvement cet établissement..."
                   rows={4}
                   className="luxury-textarea"
@@ -276,7 +307,7 @@ const AddPlace: React.FC = () => {
                 />
               </IonItem>
 
-              <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
+              <div style={{ marginTop: "24px", display: "flex", gap: "12px" }}>
                 <IonButton
                   expand="block"
                   onClick={handleSubmit}
@@ -284,9 +315,9 @@ const AddPlace: React.FC = () => {
                   className="luxury-button"
                   style={{ flex: 1 }}
                 >
-                  {isSubmitting ? 'Création...' : 'Proposer l\'établissement'}
+                  {isSubmitting ? "Création..." : "Proposer l'établissement"}
                 </IonButton>
-                
+
                 <IonButton
                   expand="block"
                   fill="outline"
@@ -298,14 +329,17 @@ const AddPlace: React.FC = () => {
                 </IonButton>
               </div>
 
-              <div style={{ 
-                marginTop: '16px', 
-                padding: '12px',
-                background: 'var(--ion-color-warning-tint)',
-                borderRadius: '4px',
-                fontSize: '0.9em'
-              }}>
-                ℹ️ Votre proposition sera examinée par un administrateur avant d'être publiée.
+              <div
+                style={{
+                  marginTop: "16px",
+                  padding: "12px",
+                  background: "var(--ion-color-warning-tint)",
+                  borderRadius: "4px",
+                  fontSize: "0.9em",
+                }}
+              >
+                ℹ️ Votre proposition sera examinée par un administrateur avant
+                d'être publiée.
               </div>
             </IonCardContent>
           </IonCard>

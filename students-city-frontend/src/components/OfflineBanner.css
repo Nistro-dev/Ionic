@@ -36,7 +36,6 @@
   }
 }
 
-/* Style alternatif pour une bannière plus discrète */
 .offline-banner.subtle {
   --background: #ffa726;
   --color: #333;

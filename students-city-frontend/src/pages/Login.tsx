@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   IonContent,
   IonPage,
@@ -8,9 +8,9 @@ import {
   IonLabel,
   IonToast,
   IonAlert,
-} from '@ionic/react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+} from "@ionic/react";
+import { useHistory, useLocation } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 interface LocationState {
   from?: { pathname: string };
@@ -19,22 +19,21 @@ interface LocationState {
 }
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [showRegistrationAlert, setShowRegistrationAlert] = useState(false);
-  const [registrationMessage, setRegistrationMessage] = useState('');
+  const [registrationMessage, setRegistrationMessage] = useState("");
 
   const { login, isAuthenticated } = useAuth();
   const history = useHistory();
   const location = useLocation<LocationState>();
 
-  // Rediriger si déjà connecté
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from?.pathname ?? '/dashboard';
+      const from = location.state?.from?.pathname ?? "/dashboard";
       history.replace(from);
     }
   }, [isAuthenticated, history, location.state]);
@@ -43,16 +42,15 @@ const Login: React.FC = () => {
     if (location.state?.registrationSuccess && location.state?.message) {
       setRegistrationMessage(location.state.message);
       setShowRegistrationAlert(true);
-      // Nettoyer l'état pour éviter de ré-afficher le message
-      history.replace('/login');
+      history.replace("/login");
     }
   }, [location.state, history]);
 
   const handleSubmit = async () => {
-    setError('');
-    
+    setError("");
+
     if (!email || !password) {
-      setError('Veuillez remplir tous les champs');
+      setError("Veuillez remplir tous les champs");
       return;
     }
 
@@ -60,9 +58,9 @@ const Login: React.FC = () => {
     try {
       await login(email, password);
       setShowToast(true);
-      // La redirection sera gérée par l'useEffect ci-dessus
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Email ou mot de passe incorrect';
+      const errorMessage =
+        err instanceof Error ? err.message : "Email ou mot de passe incorrect";
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -89,7 +87,7 @@ const Login: React.FC = () => {
                   placeholder="votre@email.com"
                   value={email}
                   onIonInput={(e) => setEmail(e.detail.value!)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   className="luxury-input"
                   required
                 />
@@ -102,7 +100,7 @@ const Login: React.FC = () => {
                   placeholder="••••••••"
                   value={password}
                   onIonInput={(e) => setPassword(e.detail.value!)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   className="luxury-input"
                   required
                 />
@@ -114,7 +112,7 @@ const Login: React.FC = () => {
                 disabled={isSubmitting}
                 className="luxury-button"
               >
-                {isSubmitting ? 'Connexion...' : 'Se connecter'}
+                {isSubmitting ? "Connexion..." : "Se connecter"}
               </IonButton>
 
               <div className="divider">
@@ -146,7 +144,7 @@ const Login: React.FC = () => {
           onDidDismiss={() => setShowRegistrationAlert(false)}
           header="Inscription réussie"
           message={registrationMessage}
-          buttons={['OK']}
+          buttons={["OK"]}
         />
       </IonContent>
     </IonPage>

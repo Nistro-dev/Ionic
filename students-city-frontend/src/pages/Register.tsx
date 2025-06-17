@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   IonContent,
   IonPage,
@@ -7,37 +7,37 @@ import {
   IonItem,
   IonLabel,
   IonToast,
-} from '@ionic/react';
-import { useHistory } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+} from "@ionic/react";
+import { useHistory } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 const Register: React.FC = () => {
-  const [pseudo, setPseudo] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pseudo, setPseudo] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
 
   const { register } = useAuth();
   const history = useHistory();
 
   const handleSubmit = async () => {
-    setError('');
-    
+    setError("");
+
     if (!pseudo || !email || !password || !confirmPassword) {
-      setError('Veuillez remplir tous les champs');
+      setError("Veuillez remplir tous les champs");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError("Le mot de passe doit contenir au moins 6 caractères");
       return;
     }
 
@@ -45,15 +45,19 @@ const Register: React.FC = () => {
     try {
       const response = await register(pseudo, email, password);
       setShowToast(true);
-      // Redirection vers login avec un message de confirmation
       setTimeout(() => {
-        history.push('/login', { 
-          registrationSuccess: true, 
-          message: response.message ?? 'Inscription réussie ! Votre compte est en attente de validation par un administrateur.'
+        history.push("/login", {
+          registrationSuccess: true,
+          message:
+            response.message ??
+            "Inscription réussie ! Votre compte est en attente de validation par un administrateur.",
         });
       }, 2000);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue lors de l\'inscription';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Une erreur est survenue lors de l'inscription";
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -110,13 +114,15 @@ const Register: React.FC = () => {
               </IonItem>
 
               <IonItem className="luxury-input-item">
-                <IonLabel position="stacked">Confirmer le mot de passe</IonLabel>
+                <IonLabel position="stacked">
+                  Confirmer le mot de passe
+                </IonLabel>
                 <IonInput
                   type="password"
                   placeholder="••••••••"
                   value={confirmPassword}
                   onIonInput={(e) => setConfirmPassword(e.detail.value!)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   className="luxury-input"
                   required
                 />
@@ -128,7 +134,7 @@ const Register: React.FC = () => {
                 disabled={isSubmitting}
                 className="luxury-button"
               >
-                {isSubmitting ? 'Inscription...' : 'S\'inscrire'}
+                {isSubmitting ? "Inscription..." : "S'inscrire"}
               </IonButton>
 
               <div className="divider">

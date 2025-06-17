@@ -1,17 +1,17 @@
-import axios from 'axios';
-import { localCache } from './localCache';
+import axios from "axios";
+import { localCache } from "./localCache";
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,23 +21,26 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && 
-        !error.config?.url?.includes('/login') && 
-        !error.config?.url?.includes('/register')) {
-      console.warn('Token expiré ou invalide, déconnexion automatique');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+    if (
+      error.response?.status === 401 &&
+      !error.config?.url?.includes("/login") &&
+      !error.config?.url?.includes("/register")
+    ) {
+      console.warn("Token expiré ou invalide, déconnexion automatique");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
       }
     }
-    
-    const errorMessage = error.response?.data?.error ?? 
-                        error.response?.data?.message ?? 
-                        error.message ?? 
-                        'Request failed';
-    
+
+    const errorMessage =
+      error.response?.data?.error ??
+      error.response?.data?.message ??
+      error.message ??
+      "Request failed";
+
     return Promise.reject(new Error(errorMessage));
   }
 );
@@ -82,30 +85,27 @@ class PlaceService {
   }
 
   async getPlaces(): Promise<Place[]> {
-    const cacheKey = 'places_all';
-    
+    const cacheKey = "places_all";
+
     if (!this.isOnline) {
-      // Mode hors ligne : récupérer depuis le cache
       const cachedPlaces = localCache.get<Place[]>(cacheKey);
       if (cachedPlaces) {
         return cachedPlaces;
       }
-      throw new Error('Aucune donnée disponible en mode hors ligne');
+      throw new Error("Aucune donnée disponible en mode hors ligne");
     }
 
     try {
-      const response = await api.get('/places');
+      const response = await api.get("/places");
       const places = response.data;
-      
-      // Sauvegarder dans le cache
-      localCache.set(cacheKey, places, 30 * 60 * 1000); // 30 minutes
-      
+
+      localCache.set(cacheKey, places, 30 * 60 * 1000);
+
       return places;
     } catch (error) {
-      // En cas d'erreur réseau, essayer le cache
       const cachedPlaces = localCache.get<Place[]>(cacheKey);
       if (cachedPlaces) {
-        console.warn('Utilisation du cache suite à une erreur réseau');
+        console.warn("Utilisation du cache suite à une erreur réseau");
         return cachedPlaces;
       }
       throw error;
@@ -114,38 +114,36 @@ class PlaceService {
 
   async searchPlaces(params: SearchParams): Promise<Place[]> {
     const cacheKey = `places_search_${JSON.stringify(params)}`;
-    
+
     if (!this.isOnline) {
-      // Mode hors ligne : récupérer depuis le cache
       const cachedResults = localCache.get<Place[]>(cacheKey);
       if (cachedResults) {
         return cachedResults;
       }
-      // Fallback : retourner tous les lieux en cache et filtrer côté client
-      const allPlaces = localCache.get<Place[]>('places_all') || [];
+      const allPlaces = localCache.get<Place[]>("places_all") || [];
       return this.filterPlacesLocally(allPlaces, params);
     }
 
     try {
       const searchParams = new URLSearchParams();
-      
-      if (params.name) searchParams.append('name', params.name);
-      if (params.type) searchParams.append('type', params.type);
-      if (params.lat) searchParams.append('lat', params.lat.toString());
-      if (params.lon) searchParams.append('lon', params.lon.toString());
 
-      const response = await api.get(`/places/search?${searchParams.toString()}`);
+      if (params.name) searchParams.append("name", params.name);
+      if (params.type) searchParams.append("type", params.type);
+      if (params.lat) searchParams.append("lat", params.lat.toString());
+      if (params.lon) searchParams.append("lon", params.lon.toString());
+
+      const response = await api.get(
+        `/places/search?${searchParams.toString()}`
+      );
       const results = response.data;
-      
-      // Sauvegarder dans le cache
-      localCache.set(cacheKey, results, 15 * 60 * 1000); // 15 minutes
-      
+
+      localCache.set(cacheKey, results, 15 * 60 * 1000);
+
       return results;
     } catch (error) {
-      // En cas d'erreur réseau, essayer le cache
       const cachedResults = localCache.get<Place[]>(cacheKey);
       if (cachedResults) {
-        console.warn('Utilisation du cache suite à une erreur réseau');
+        console.warn("Utilisation du cache suite à une erreur réseau");
         return cachedResults;
       }
       throw error;
@@ -154,63 +152,60 @@ class PlaceService {
 
   async getPlace(id: number): Promise<Place> {
     const cacheKey = `place_${id}`;
-    
+
     if (!this.isOnline) {
-      // Mode hors ligne : récupérer depuis le cache
       const cachedPlace = localCache.get<Place>(cacheKey);
       if (cachedPlace) {
         return cachedPlace;
       }
-      throw new Error('Détails du lieu non disponibles en mode hors ligne');
+      throw new Error("Détails du lieu non disponibles en mode hors ligne");
     }
 
     try {
       const response = await api.get(`/places/${id}`);
       const place = response.data;
-      
-      // Sauvegarder dans le cache
-      localCache.set(cacheKey, place, 60 * 60 * 1000); // 1 heure
-      
+
+      localCache.set(cacheKey, place, 60 * 60 * 1000);
+
       return place;
     } catch (error) {
-      // En cas d'erreur réseau, essayer le cache
       const cachedPlace = localCache.get<Place>(cacheKey);
       if (cachedPlace) {
-        console.warn('Utilisation du cache suite à une erreur réseau');
+        console.warn("Utilisation du cache suite à une erreur réseau");
         return cachedPlace;
       }
       throw error;
     }
   }
 
-  async createPlace(data: CreatePlaceData): Promise<{ success: boolean; message: string; place?: Place }> {
+  async createPlace(
+    data: CreatePlaceData
+  ): Promise<{ success: boolean; message: string; place?: Place }> {
     if (!this.isOnline) {
-      throw new Error('Impossible de créer un lieu en mode hors ligne');
+      throw new Error("Impossible de créer un lieu en mode hors ligne");
     }
-    
-    const response = await api.post('/places', data);
+
+    const response = await api.post("/places", data);
     return response.data;
   }
 
   async getPlaceTypes(): Promise<string[]> {
-    const cacheKey = 'place_types';
-    
+    const cacheKey = "place_types";
+
     if (!this.isOnline) {
       const cachedTypes = localCache.get<string[]>(cacheKey);
       if (cachedTypes) {
         return cachedTypes;
       }
-      // Types par défaut si pas de cache
-      return ['Restaurant', 'Bar', 'Café', 'Activité', 'Autre'];
+      return ["Restaurant", "Bar", "Café", "Activité", "Autre"];
     }
 
     try {
-      const response = await api.get('/places/types');
+      const response = await api.get("/places/types");
       const types = response.data;
-      
-      // Sauvegarder dans le cache (longue durée car les types changent peu)
-      localCache.set(cacheKey, types, 24 * 60 * 60 * 1000); // 24 heures
-      
+
+      localCache.set(cacheKey, types, 24 * 60 * 60 * 1000);
+
       return types;
     } catch (error) {
       const cachedTypes = localCache.get<string[]>(cacheKey);
@@ -223,24 +218,24 @@ class PlaceService {
 
   async getUserPlaces(): Promise<Place[]> {
     if (!this.isOnline) {
-      throw new Error('Impossible de récupérer vos lieux en mode hors ligne');
+      throw new Error("Impossible de récupérer vos lieux en mode hors ligne");
     }
-    
-    const response = await api.get('/user/places');
+
+    const response = await api.get("/user/places");
     return response.data;
   }
 
-  // Filtrage local des lieux (pour le mode hors ligne)
   private filterPlacesLocally(places: Place[], params: SearchParams): Place[] {
-    return places.filter(place => {
-      if (params.name && !place.name.toLowerCase().includes(params.name.toLowerCase())) {
+    return places.filter((place) => {
+      if (
+        params.name &&
+        !place.name.toLowerCase().includes(params.name.toLowerCase())
+      ) {
         return false;
       }
       if (params.type && place.type !== params.type) {
         return false;
       }
-      // Pour la distance, on ne peut pas calculer sans géolocalisation complexe
-      // On retourne tous les résultats qui matchent les autres critères
       return true;
     });
   }

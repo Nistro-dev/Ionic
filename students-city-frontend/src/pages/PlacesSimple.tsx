@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   IonContent,
   IonHeader,
@@ -20,19 +20,24 @@ import {
   IonFabButton,
   IonLoading,
   IonToast,
-} from '@ionic/react';
-import { add, location, star } from 'ionicons/icons';
-import { Place, placeService, SearchParams } from '../services/places';
-import { geolocationService, GeolocationPosition } from '../services/geolocation';
+} from "@ionic/react";
+import { add, location, star } from "ionicons/icons";
+import { Place, placeService, SearchParams } from "../services/places";
+import {
+  geolocationService,
+  GeolocationPosition,
+} from "../services/geolocation";
 
 const Places: React.FC = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [types, setTypes] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState('');
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [userPosition, setUserPosition] = useState<GeolocationPosition | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [userPosition, setUserPosition] = useState<GeolocationPosition | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
 
   const loadPlaces = useCallback(async () => {
@@ -52,7 +57,9 @@ const Places: React.FC = () => {
       const placesData = await placeService.searchPlaces(searchParams);
       setPlaces(placesData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+      setError(
+        err instanceof Error ? err.message : "Erreur lors du chargement"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +70,7 @@ const Places: React.FC = () => {
       const typesData = await placeService.getPlaceTypes();
       setTypes(typesData);
     } catch (err) {
-      console.error('Erreur chargement types:', err);
+      console.error("Erreur chargement types:", err);
     }
   }, []);
 
@@ -72,7 +79,7 @@ const Places: React.FC = () => {
       const position = await geolocationService.getCurrentPosition();
       setUserPosition(position);
     } catch (err) {
-      console.warn('Géolocalisation échouée:', err);
+      console.warn("Géolocalisation échouée:", err);
     }
   }, []);
 
@@ -98,8 +105,8 @@ const Places: React.FC = () => {
       <IonIcon
         key={i}
         icon={star}
-        color={i < Math.floor(rating) ? 'warning' : 'medium'}
-        style={{ fontSize: '14px' }}
+        color={i < Math.floor(rating) ? "warning" : "medium"}
+        style={{ fontSize: "14px" }}
       />
     ));
   };
@@ -113,15 +120,18 @@ const Places: React.FC = () => {
       </IonHeader>
 
       <IonContent className="luxury-content">
-        <div className="search-filters" style={{ padding: '16px', background: 'var(--ion-color-light)' }}>
+        <div
+          className="search-filters"
+          style={{ padding: "16px", background: "var(--ion-color-light)" }}
+        >
           <IonSearchbar
             value={searchText}
             onIonInput={(e) => handleSearch(e.detail.value!)}
             placeholder="Rechercher un établissement..."
             className="luxury-searchbar"
-            style={{ marginBottom: '12px' }}
+            style={{ marginBottom: "12px" }}
           />
-          
+
           <IonSelect
             value={selectedType}
             onIonChange={(e) => handleTypeFilter(e.detail.value)}
@@ -130,43 +140,55 @@ const Places: React.FC = () => {
             className="luxury-select"
           >
             <IonSelectOption value="">Tous les types</IonSelectOption>
-            {types.map(type => (
-              <IonSelectOption key={type} value={type}>{type}</IonSelectOption>
+            {types.map((type) => (
+              <IonSelectOption key={type} value={type}>
+                {type}
+              </IonSelectOption>
             ))}
           </IonSelect>
 
           {userPosition && (
-            <div style={{ 
-              marginTop: '12px', 
-              padding: '8px 12px', 
-              background: 'var(--luxury-success-light)',
-              borderRadius: '8px',
-              fontSize: '0.9em',
-              color: 'var(--luxury-success-dark)'
-            }}>
+            <div
+              style={{
+                marginTop: "12px",
+                padding: "8px 12px",
+                background: "var(--luxury-success-light)",
+                borderRadius: "8px",
+                fontSize: "0.9em",
+                color: "var(--luxury-success-dark)",
+              }}
+            >
               📍 Position détectée - Tri par distance activé
             </div>
           )}
         </div>
 
         {error && (
-          <div className="error-message luxury-error" style={{ margin: '16px' }}>
+          <div
+            className="error-message luxury-error"
+            style={{ margin: "16px" }}
+          >
             {error}
           </div>
         )}
 
-        <div style={{ padding: '0 16px' }}>
+        <div style={{ padding: "0 16px" }}>
           {places.length === 0 && !isLoading && (
             <IonCard className="luxury-card">
-              <IonCardContent style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <h3 style={{ color: 'var(--luxury-text-secondary)' }}>Aucun établissement trouvé</h3>
-                <p style={{ color: 'var(--luxury-text-tertiary)' }}>
-                  Essayez de modifier vos critères de recherche ou proposez un nouvel établissement.
+              <IonCardContent
+                style={{ textAlign: "center", padding: "40px 20px" }}
+              >
+                <h3 style={{ color: "var(--luxury-text-secondary)" }}>
+                  Aucun établissement trouvé
+                </h3>
+                <p style={{ color: "var(--luxury-text-tertiary)" }}>
+                  Essayez de modifier vos critères de recherche ou proposez un
+                  nouvel établissement.
                 </p>
                 <IonButton
                   routerLink="/places/add"
                   className="luxury-button"
-                  style={{ marginTop: '16px' }}
+                  style={{ marginTop: "16px" }}
                 >
                   Proposer un établissement
                 </IonButton>
@@ -174,33 +196,48 @@ const Places: React.FC = () => {
             </IonCard>
           )}
 
-          <IonList style={{ background: 'transparent' }}>
-            {places.map(place => (
-              <IonCard key={place.id} className="luxury-card" style={{ marginBottom: '16px' }}>
+          <IonList style={{ background: "transparent" }}>
+            {places.map((place) => (
+              <IonCard
+                key={place.id}
+                className="luxury-card"
+                style={{ marginBottom: "16px" }}
+              >
                 <IonCardHeader>
                   <IonCardTitle className="luxury-card-title">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "start",
+                      }}
+                    >
                       <div>
-                        <h3 style={{ margin: '0 0 8px 0', color: 'var(--luxury-text-primary)' }}>
+                        <h3
+                          style={{
+                            margin: "0 0 8px 0",
+                            color: "var(--luxury-text-primary)",
+                          }}
+                        >
                           {place.name}
                         </h3>
-                        <IonBadge 
-                          color="primary" 
-                          style={{ 
-                            background: 'var(--luxury-gradient)',
-                            color: 'white',
-                            fontWeight: '500'
+                        <IonBadge
+                          color="primary"
+                          style={{
+                            background: "var(--luxury-gradient)",
+                            color: "white",
+                            fontWeight: "500",
                           }}
                         >
                           {place.type}
                         </IonBadge>
                       </div>
                       {place.distance && (
-                        <IonBadge 
+                        <IonBadge
                           color="medium"
-                          style={{ 
-                            background: 'var(--luxury-secondary)',
-                            color: 'white'
+                          style={{
+                            background: "var(--luxury-secondary)",
+                            color: "white",
                           }}
                         >
                           {place.distance} km
@@ -209,60 +246,74 @@ const Places: React.FC = () => {
                     </div>
                   </IonCardTitle>
                 </IonCardHeader>
-                
-                <IonCardContent style={{ padding: '0 16px 16px 16px' }}>
-                  <p style={{ 
-                    margin: '0 0 12px 0',
-                    color: 'var(--luxury-text-secondary)',
-                    lineHeight: '1.5'
-                  }}>
+
+                <IonCardContent style={{ padding: "0 16px 16px 16px" }}>
+                  <p
+                    style={{
+                      margin: "0 0 12px 0",
+                      color: "var(--luxury-text-secondary)",
+                      lineHeight: "1.5",
+                    }}
+                  >
                     {place.description}
                   </p>
-                  
-                  <p style={{ 
-                    fontSize: '0.9em', 
-                    color: 'var(--luxury-text-tertiary)',
-                    margin: '0 0 12px 0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    <IonIcon icon={location} style={{ fontSize: '16px' }} />
+
+                  <p
+                    style={{
+                      fontSize: "0.9em",
+                      color: "var(--luxury-text-tertiary)",
+                      margin: "0 0 12px 0",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
+                    <IonIcon icon={location} style={{ fontSize: "16px" }} />
                     {place.adresse}
                   </p>
-                  
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '8px', 
-                    marginBottom: '16px',
-                    padding: '8px 12px',
-                    background: 'var(--luxury-warning-light)',
-                    borderRadius: '8px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "16px",
+                      padding: "8px 12px",
+                      background: "var(--luxury-warning-light)",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
                       {renderStars(place.averageRating)}
                     </div>
-                    <span style={{ 
-                      fontWeight: '600',
-                      color: 'var(--luxury-warning-dark)'
-                    }}>
+                    <span
+                      style={{
+                        fontWeight: "600",
+                        color: "var(--luxury-warning-dark)",
+                      }}
+                    >
                       {place.averageRating.toFixed(1)}
                     </span>
-                    <span style={{ color: 'var(--luxury-text-tertiary)' }}>
+                    <span style={{ color: "var(--luxury-text-tertiary)" }}>
                       ({place.reviewCount} avis)
                     </span>
                   </div>
-                  
+
                   <IonButton
                     fill="clear"
                     routerLink={`/places/${place.id}`}
                     className="luxury-link-button"
-                    style={{ 
-                      margin: '0',
-                      padding: '0',
-                      height: 'auto',
-                      '--color': 'var(--luxury-primary)'
+                    style={{
+                      margin: "0",
+                      padding: "0",
+                      height: "auto",
+                      "--color": "var(--luxury-primary)",
                     }}
                   >
                     Voir détails et avis →
@@ -274,12 +325,12 @@ const Places: React.FC = () => {
         </div>
 
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton 
-            routerLink="/places/add" 
+          <IonFabButton
+            routerLink="/places/add"
             className="luxury-fab"
-            style={{ 
-              '--background': 'var(--luxury-gradient)',
-              '--color': 'white'
+            style={{
+              "--background": "var(--luxury-gradient)",
+              "--color": "white",
             }}
           >
             <IonIcon icon={add} />

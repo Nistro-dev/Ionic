@@ -25,8 +25,6 @@ import { add, location, star } from 'ionicons/icons';
 import { Place, placeService, SearchParams } from '../services/places';
 import { geolocationService, GeolocationPosition } from '../services/geolocation';
 import { useNetworkContext } from '../contexts/NetworkContext';
-import OfflineTestPanel from '../components/OfflineTestPanel';
-import SplashTestPanel from '../components/SplashTestPanel';
 
 const Places: React.FC = () => {
   const [places, setPlaces] = useState<Place[]>([]);

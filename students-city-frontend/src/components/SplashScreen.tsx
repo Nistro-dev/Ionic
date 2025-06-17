@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import './SplashScreen.css';
+import React, { useEffect, useState } from "react";
+import "./SplashScreen.css";
 
 interface SplashScreenProps {
   isVisible: boolean;
@@ -11,10 +11,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ isVisible, onHide }) => {
 
   useEffect(() => {
     if (!isVisible && isAnimating) {
-      // Animation de sortie
       const timer = setTimeout(() => {
         onHide();
-      }, 500); // Durée de l'animation de sortie
+      }, 500);
 
       return () => clearTimeout(timer);
     }
@@ -23,8 +22,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ isVisible, onHide }) => {
   useEffect(() => {
     if (isVisible) {
       setIsAnimating(true);
-      
-      // Auto-hide après 3 secondes
+
       const timer = setTimeout(() => {
         setIsAnimating(false);
       }, 3000);
@@ -36,21 +34,21 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ isVisible, onHide }) => {
   if (!isVisible && !isAnimating) return null;
 
   return (
-    <div className={`splash-screen ${!isVisible ? 'fade-out' : ''}`}>
+    <div className={`splash-screen ${!isVisible ? "fade-out" : ""}`}>
       <div className="splash-content">
         <div className="logo-container">
-          <img 
-            src="/logo.svg" 
-            alt="Students City Logo" 
+          <img
+            src="/logo.svg"
+            alt="Students City Logo"
             className="splash-logo"
           />
         </div>
-        
+
         <div className="app-title">
           <h1>Students City</h1>
           <p>Découvrez votre ville étudiante</p>
         </div>
-        
+
         <div className="loading-indicator">
           <div className="loading-dots">
             <span></span>

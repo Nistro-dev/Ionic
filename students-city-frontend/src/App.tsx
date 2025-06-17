@@ -1,41 +1,27 @@
-import {
-  IonApp,
-  setupIonicReact
-} from '@ionic/react';
-import { AuthProvider } from './contexts/AuthContext';
-import { NetworkProvider } from './contexts/NetworkContext';
-import AppContent from './components/AppContent';
-import SplashScreen from './components/SplashScreen';
-import { useSplashScreen } from './hooks/useSplashScreen';
+import { IonApp, setupIonicReact } from "@ionic/react";
+import { AuthProvider } from "./contexts/AuthContext";
+import { NetworkProvider } from "./contexts/NetworkContext";
+import AppContent from "./components/AppContent";
+import SplashScreen from "./components/SplashScreen";
+import { useSplashScreen } from "./hooks/useSplashScreen";
 
-/* Core CSS required for Ionic components to work properly */
-import '@ionic/react/css/core.css';
+import "@ionic/react/css/core.css";
 
-/* Basic CSS for apps built with Ionic */
-import '@ionic/react/css/normalize.css';
-import '@ionic/react/css/structure.css';
-import '@ionic/react/css/typography.css';
+import "@ionic/react/css/normalize.css";
+import "@ionic/react/css/structure.css";
+import "@ionic/react/css/typography.css";
 
-/* Optional CSS utils that can be commented out */
-import '@ionic/react/css/padding.css';
-import '@ionic/react/css/float-elements.css';
-import '@ionic/react/css/text-alignment.css';
-import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
+import "@ionic/react/css/padding.css";
+import "@ionic/react/css/float-elements.css";
+import "@ionic/react/css/text-alignment.css";
+import "@ionic/react/css/text-transformation.css";
+import "@ionic/react/css/flex-utils.css";
+import "@ionic/react/css/display.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+import "@ionic/react/css/palettes/dark.system.css";
 
-import '@ionic/react/css/palettes/dark.system.css';
-
-/* Theme variables */
-import './theme/variables.css';
-import './theme/luxury.css';
+import "./theme/variables.css";
+import "./theme/luxury.css";
 
 setupIonicReact();
 
@@ -49,11 +35,8 @@ const App: React.FC = () => {
           <AppContent />
         </AuthProvider>
       </NetworkProvider>
-      
-      <SplashScreen 
-        isVisible={isVisible} 
-        onHide={hideSplash}
-      />
+
+      <SplashScreen isVisible={isVisible} onHide={hideSplash} />
     </IonApp>
   );
 };

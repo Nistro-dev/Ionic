@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   IonContent,
   IonPage,
@@ -15,20 +15,20 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonLoading,
-} from '@ionic/react';
-import { useAuth } from '../hooks/useAuth';
-import { useNavigation } from '../hooks/useNavigation';
-import { profileService } from '../services/profile';
+} from "@ionic/react";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigation } from "../hooks/useNavigation";
+import { profileService } from "../services/profile";
 
 const Profile: React.FC = () => {
-  const [pseudo, setPseudo] = useState('');
-  const [email, setEmail] = useState('');
+  const [pseudo, setPseudo] = useState("");
+  const [email, setEmail] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState("");
 
   const { user, logout } = useAuth();
   const { navigateTo } = useNavigation();
@@ -38,24 +38,29 @@ const Profile: React.FC = () => {
       setIsLoading(false);
       return;
     }
-    
+
     setIsLoading(true);
-    setError('');
+    setError("");
     try {
       const profile = await profileService.getProfile();
-      setPseudo(profile.pseudo ?? '');
-      setEmail(profile.email ?? '');
+      setPseudo(profile.pseudo ?? "");
+      setEmail(profile.email ?? "");
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement du profil';
-      console.error('Erreur chargement profil:', err);
-      
-      // Si c'est une erreur d'authentification, on déconnecte
-      if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erreur lors du chargement du profil";
+      console.error("Erreur chargement profil:", err);
+
+      if (
+        errorMessage.includes("401") ||
+        errorMessage.includes("Unauthorized")
+      ) {
         logout();
-        navigateTo('/login');
+        navigateTo("/login");
         return;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -67,26 +72,30 @@ const Profile: React.FC = () => {
   }, [loadProfile]);
 
   const handleSubmit = async () => {
-    setError('');
-    
+    setError("");
+
     if (!pseudo.trim() || !email.trim()) {
-      setError('Veuillez remplir tous les champs');
+      setError("Veuillez remplir tous les champs");
       return;
     }
 
-    if (!email.includes('@')) {
-      setError('Veuillez entrer une adresse email valide');
+    if (!email.includes("@")) {
+      setError("Veuillez entrer une adresse email valide");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await profileService.updateProfile({ pseudo: pseudo.trim(), email: email.trim() });
-      setToastMessage('Profil mis à jour avec succès !');
+      await profileService.updateProfile({
+        pseudo: pseudo.trim(),
+        email: email.trim(),
+      });
+      setToastMessage("Profil mis à jour avec succès !");
       setShowToast(true);
       setIsEditing(false);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur lors de la mise à jour";
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -95,11 +104,11 @@ const Profile: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigateTo('/login');
+    navigateTo("/login");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && isEditing) {
+    if (e.key === "Enter" && isEditing) {
       handleSubmit();
     }
   };
@@ -111,23 +120,25 @@ const Profile: React.FC = () => {
           <IonTitle>Mon Profil</IonTitle>
         </IonToolbar>
       </IonHeader>
-      
+
       <IonContent className="luxury-content">
         <div className="profile-container">
           <IonCard className="luxury-card">
             <IonCardHeader>
-              <IonCardTitle className="luxury-title">Informations personnelles</IonCardTitle>
+              <IonCardTitle className="luxury-title">
+                Informations personnelles
+              </IonCardTitle>
             </IonCardHeader>
-            
+
             <IonCardContent>
               {error && (
-                <div className="error-message luxury-error">
-                  {error}
-                </div>
+                <div className="error-message luxury-error">{error}</div>
               )}
 
               <IonItem className="luxury-item">
-                <IonLabel position="stacked" className="luxury-label">Pseudo</IonLabel>
+                <IonLabel position="stacked" className="luxury-label">
+                  Pseudo
+                </IonLabel>
                 <IonInput
                   value={pseudo}
                   onIonInput={(e) => setPseudo(e.detail.value!)}
@@ -139,7 +150,9 @@ const Profile: React.FC = () => {
               </IonItem>
 
               <IonItem className="luxury-item">
-                <IonLabel position="stacked" className="luxury-label">Email</IonLabel>
+                <IonLabel position="stacked" className="luxury-label">
+                  Email
+                </IonLabel>
                 <IonInput
                   value={email}
                   onIonInput={(e) => setEmail(e.detail.value!)}
@@ -168,16 +181,16 @@ const Profile: React.FC = () => {
                       disabled={isSubmitting}
                       className="luxury-button"
                     >
-                      {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+                      {isSubmitting ? "Enregistrement..." : "Enregistrer"}
                     </IonButton>
-                    
+
                     <IonButton
                       expand="block"
                       fill="outline"
                       onClick={() => {
                         setIsEditing(false);
                         loadProfile();
-                        setError('');
+                        setError("");
                       }}
                       className="luxury-button-outline"
                     >
@@ -203,10 +216,7 @@ const Profile: React.FC = () => {
           </IonCard>
         </div>
 
-        <IonLoading
-          isOpen={isLoading}
-          message="Chargement du profil..."
-        />
+        <IonLoading isOpen={isLoading} message="Chargement du profil..." />
 
         <IonToast
           isOpen={showToast}

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { splashScreenService } from '../services/splashScreen';
-import { Capacitor } from '@capacitor/core';
+import { useState, useEffect } from "react";
+import { splashScreenService } from "../services/splashScreen";
+import { Capacitor } from "@capacitor/core";
 
 export const useSplashScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -9,31 +9,28 @@ export const useSplashScreen = () => {
   useEffect(() => {
     const initializeSplash = async () => {
       try {
-        // Sur mobile, utiliser le plugin natif
         if (Capacitor.isNativePlatform()) {
           await splashScreenService.initialize();
         }
-        
+
         setIsInitialized(true);
-        
-        // Simuler le chargement de l'application
-        const loadingPromise = new Promise(resolve => {
-          // Simuler le temps de chargement initial
+
+        const loadingPromise = new Promise((resolve) => {
           setTimeout(resolve, 1500);
         });
 
         await loadingPromise;
 
-        // Cacher le splash screen après le chargement
         if (Capacitor.isNativePlatform()) {
           await splashScreenService.hide();
         }
-        
-        // Pour le web, gérer via l'état React
+
         setIsVisible(false);
-        
       } catch (error) {
-        console.error('Erreur lors de l\'initialisation du splash screen:', error);
+        console.error(
+          "Erreur lors de l'initialisation du splash screen:",
+          error
+        );
         setIsVisible(false);
         setIsInitialized(true);
       }
@@ -57,6 +54,6 @@ export const useSplashScreen = () => {
     isVisible,
     isInitialized,
     hideSplash,
-    forceHide
+    forceHide,
   };
 };

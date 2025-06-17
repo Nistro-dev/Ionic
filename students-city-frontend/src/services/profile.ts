@@ -1,4 +1,4 @@
-import api from './auth';
+import api from "./auth";
 
 export interface ProfileData {
   pseudo: string;
@@ -14,12 +14,12 @@ export interface UpdateProfileData {
 
 export const profileService = {
   getProfile: async (): Promise<ProfileData> => {
-    const response = await api.get('/profile');
+    const response = await api.get("/profile");
     return response.data;
   },
 
   updateProfile: async (data: UpdateProfileData): Promise<ProfileData> => {
-    const response = await api.put('/profile', data);
+    const response = await api.put("/profile", data);
     return response.data;
   },
 };

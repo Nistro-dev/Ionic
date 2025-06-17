@@ -9,18 +9,18 @@ declare namespace google {
     class Map {
       constructor(mapDiv: HTMLElement, opts?: MapOptions);
     }
-    
+
     class Marker {
       constructor(opts?: MarkerOptions);
       addListener(eventName: string, handler: () => void): void;
       setMap(map: Map | null): void;
     }
-    
+
     class InfoWindow {
       constructor(opts?: InfoWindowOptions);
       open(map: Map, anchor?: Marker): void;
     }
-    
+
     class Size {
       constructor(width: number, height: number);
     }
