@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { localCache } from './localCache';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
 
@@ -74,41 +75,174 @@ export interface SearchParams {
 }
 
 class PlaceService {
+  private isOnline: boolean = true;
+
+  setOnlineStatus(online: boolean) {
+    this.isOnline = online;
+  }
+
   async getPlaces(): Promise<Place[]> {
-    const response = await api.get('/places');
-    return response.data;
+    const cacheKey = 'places_all';
+    
+    if (!this.isOnline) {
+      // Mode hors ligne : récupérer depuis le cache
+      const cachedPlaces = localCache.get<Place[]>(cacheKey);
+      if (cachedPlaces) {
+        return cachedPlaces;
+      }
+      throw new Error('Aucune donnée disponible en mode hors ligne');
+    }
+
+    try {
+      const response = await api.get('/places');
+      const places = response.data;
+      
+      // Sauvegarder dans le cache
+      localCache.set(cacheKey, places, 30 * 60 * 1000); // 30 minutes
+      
+      return places;
+    } catch (error) {
+      // En cas d'erreur réseau, essayer le cache
+      const cachedPlaces = localCache.get<Place[]>(cacheKey);
+      if (cachedPlaces) {
+        console.warn('Utilisation du cache suite à une erreur réseau');
+        return cachedPlaces;
+      }
+      throw error;
+    }
   }
 
   async searchPlaces(params: SearchParams): Promise<Place[]> {
-    const searchParams = new URLSearchParams();
+    const cacheKey = `places_search_${JSON.stringify(params)}`;
     
-    if (params.name) searchParams.append('name', params.name);
-    if (params.type) searchParams.append('type', params.type);
-    if (params.lat) searchParams.append('lat', params.lat.toString());
-    if (params.lon) searchParams.append('lon', params.lon.toString());
+    if (!this.isOnline) {
+      // Mode hors ligne : récupérer depuis le cache
+      const cachedResults = localCache.get<Place[]>(cacheKey);
+      if (cachedResults) {
+        return cachedResults;
+      }
+      // Fallback : retourner tous les lieux en cache et filtrer côté client
+      const allPlaces = localCache.get<Place[]>('places_all') || [];
+      return this.filterPlacesLocally(allPlaces, params);
+    }
 
-    const response = await api.get(`/places/search?${searchParams.toString()}`);
-    return response.data;
+    try {
+      const searchParams = new URLSearchParams();
+      
+      if (params.name) searchParams.append('name', params.name);
+      if (params.type) searchParams.append('type', params.type);
+      if (params.lat) searchParams.append('lat', params.lat.toString());
+      if (params.lon) searchParams.append('lon', params.lon.toString());
+
+      const response = await api.get(`/places/search?${searchParams.toString()}`);
+      const results = response.data;
+      
+      // Sauvegarder dans le cache
+      localCache.set(cacheKey, results, 15 * 60 * 1000); // 15 minutes
+      
+      return results;
+    } catch (error) {
+      // En cas d'erreur réseau, essayer le cache
+      const cachedResults = localCache.get<Place[]>(cacheKey);
+      if (cachedResults) {
+        console.warn('Utilisation du cache suite à une erreur réseau');
+        return cachedResults;
+      }
+      throw error;
+    }
   }
 
   async getPlace(id: number): Promise<Place> {
-    const response = await api.get(`/places/${id}`);
-    return response.data;
+    const cacheKey = `place_${id}`;
+    
+    if (!this.isOnline) {
+      // Mode hors ligne : récupérer depuis le cache
+      const cachedPlace = localCache.get<Place>(cacheKey);
+      if (cachedPlace) {
+        return cachedPlace;
+      }
+      throw new Error('Détails du lieu non disponibles en mode hors ligne');
+    }
+
+    try {
+      const response = await api.get(`/places/${id}`);
+      const place = response.data;
+      
+      // Sauvegarder dans le cache
+      localCache.set(cacheKey, place, 60 * 60 * 1000); // 1 heure
+      
+      return place;
+    } catch (error) {
+      // En cas d'erreur réseau, essayer le cache
+      const cachedPlace = localCache.get<Place>(cacheKey);
+      if (cachedPlace) {
+        console.warn('Utilisation du cache suite à une erreur réseau');
+        return cachedPlace;
+      }
+      throw error;
+    }
   }
 
   async createPlace(data: CreatePlaceData): Promise<{ success: boolean; message: string; place?: Place }> {
+    if (!this.isOnline) {
+      throw new Error('Impossible de créer un lieu en mode hors ligne');
+    }
+    
     const response = await api.post('/places', data);
     return response.data;
   }
 
   async getPlaceTypes(): Promise<string[]> {
-    const response = await api.get('/places/types');
-    return response.data;
+    const cacheKey = 'place_types';
+    
+    if (!this.isOnline) {
+      const cachedTypes = localCache.get<string[]>(cacheKey);
+      if (cachedTypes) {
+        return cachedTypes;
+      }
+      // Types par défaut si pas de cache
+      return ['Restaurant', 'Bar', 'Café', 'Activité', 'Autre'];
+    }
+
+    try {
+      const response = await api.get('/places/types');
+      const types = response.data;
+      
+      // Sauvegarder dans le cache (longue durée car les types changent peu)
+      localCache.set(cacheKey, types, 24 * 60 * 60 * 1000); // 24 heures
+      
+      return types;
+    } catch (error) {
+      const cachedTypes = localCache.get<string[]>(cacheKey);
+      if (cachedTypes) {
+        return cachedTypes;
+      }
+      throw error;
+    }
   }
 
   async getUserPlaces(): Promise<Place[]> {
+    if (!this.isOnline) {
+      throw new Error('Impossible de récupérer vos lieux en mode hors ligne');
+    }
+    
     const response = await api.get('/user/places');
     return response.data;
+  }
+
+  // Filtrage local des lieux (pour le mode hors ligne)
+  private filterPlacesLocally(places: Place[], params: SearchParams): Place[] {
+    return places.filter(place => {
+      if (params.name && !place.name.toLowerCase().includes(params.name.toLowerCase())) {
+        return false;
+      }
+      if (params.type && place.type !== params.type) {
+        return false;
+      }
+      // Pour la distance, on ne peut pas calculer sans géolocalisation complexe
+      // On retourne tous les résultats qui matchent les autres critères
+      return true;
+    });
   }
 }
 

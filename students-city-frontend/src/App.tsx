@@ -1,19 +1,10 @@
-import { Redirect, Route } from 'react-router-dom';
 import {
   IonApp,
-  IonRouterOutlet,
   setupIonicReact
 } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
 import { AuthProvider } from './contexts/AuthContext';
-import PrivateRoute from './components/PrivateRoute';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Places from './pages/Places';
-import AddPlace from './pages/AddPlace';
-import PlaceDetail from './pages/PlaceDetail';
+import { NetworkProvider } from './contexts/NetworkContext';
+import AppContent from './components/AppContent';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -48,26 +39,11 @@ setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-    <AuthProvider>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/login">
-            <Login />
-          </Route>
-          <Route exact path="/register">
-            <Register />
-          </Route>
-          <PrivateRoute exact path="/dashboard" component={Dashboard} />
-          <PrivateRoute exact path="/profile" component={Profile} />
-          <PrivateRoute exact path="/places" component={Places} />
-          <PrivateRoute exact path="/places/add" component={AddPlace} />
-          <PrivateRoute exact path="/places/:id" component={PlaceDetail} />
-          <Route exact path="/">
-            <Redirect to="/dashboard" />
-          </Route>
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </AuthProvider>
+    <NetworkProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </NetworkProvider>
   </IonApp>
 );
 

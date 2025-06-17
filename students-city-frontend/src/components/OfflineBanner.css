@@ -1,0 +1,49 @@
+.offline-banner {
+  --background: #ff6b6b;
+  --color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  margin: 0;
+  border-radius: 0;
+  animation: slideDown 0.3s ease-out;
+}
+
+.offline-banner .offline-icon {
+  color: white;
+  font-size: 1.2em;
+  margin-right: 8px;
+}
+
+.offline-banner .offline-text {
+  color: white;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.offline-banner ion-label {
+  color: white !important;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Style alternatif pour une bannière plus discrète */
+.offline-banner.subtle {
+  --background: #ffa726;
+  --color: #333;
+}
+
+.offline-banner.subtle .offline-icon,
+.offline-banner.subtle .offline-text,
+.offline-banner.subtle ion-label {
+  color: #333 !important;
+}

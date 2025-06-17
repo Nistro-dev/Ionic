@@ -23,14 +23,16 @@ import {
   IonButtons,
   IonAlert,
 } from '@ionic/react';
-import { star, location, time, person, create, trash } from 'ionicons/icons';
+import { star, location, time, person, create, trash, cloudOffline } from 'ionicons/icons';
 import { useParams } from 'react-router-dom';
 import { Place, placeService } from '../services/places';
 import { Review, PlaceReviews, reviewService, CreateReviewData, UpdateReviewData } from '../services/reviews';
 import { useAuth } from '../hooks/useAuth';
+import { useNetworkContext } from '../contexts/NetworkContext';
 
 const PlaceDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { isOnline } = useNetworkContext();
   const [place, setPlace] = useState<Place | null>(null);
   const [reviews, setReviews] = useState<PlaceReviews | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +40,7 @@ const PlaceDetail: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState<'success' | 'danger'>('success');
+  const [isFromCache, setIsFromCache] = useState(false);
   
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewText, setReviewText] = useState('');
@@ -56,10 +59,15 @@ const PlaceDetail: React.FC = () => {
     try {
       const placeData = await placeService.getPlace(parseInt(id));
       setPlace(placeData);
+      
+      if (!isOnline) {
+        setIsFromCache(true);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement';
+      setError(!isOnline ? `Mode hors ligne - ${errorMessage}` : errorMessage);
     }
-  }, [id]);
+  }, [id, isOnline]);
 
   const loadReviews = useCallback(async () => {
     if (!id) return;
@@ -69,8 +77,11 @@ const PlaceDetail: React.FC = () => {
       setReviews(reviewsData);
     } catch (err) {
       console.error('Erreur chargement avis:', err);
+      if (!isOnline) {
+        setError('Avis non disponibles en mode hors ligne');
+      }
     }
-  }, [id]);
+  }, [id, isOnline]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -103,6 +114,12 @@ const PlaceDetail: React.FC = () => {
   };
 
   const handleSubmitReview = async () => {
+    if (!isOnline) {
+      setError('Impossible de publier un avis en mode hors ligne');
+      setShowToast(true);
+      return;
+    }
+    
     if (!place || !reviewText.trim()) {
       setError('Veuillez remplir tous les champs');
       return;
@@ -135,6 +152,12 @@ const PlaceDetail: React.FC = () => {
   };
 
   const handleEditReview = async () => {
+    if (!isOnline) {
+      setError('Impossible de modifier un avis en mode hors ligne');
+      setShowToast(true);
+      return;
+    }
+    
     if (!editingReview || !reviewText.trim()) {
       setError('Veuillez remplir tous les champs');
       return;
@@ -171,6 +194,14 @@ const PlaceDetail: React.FC = () => {
   };
 
   const handleDeleteReview = async () => {
+    if (!isOnline) {
+      setError('Impossible de supprimer un avis en mode hors ligne');
+      setShowToast(true);
+      setShowDeleteAlert(false);
+      setReviewToDelete(null);
+      return;
+    }
+    
     if (!reviewToDelete) return;
 
     try {
@@ -246,6 +277,32 @@ const PlaceDetail: React.FC = () => {
           </div>
         )}
 
+        {!isOnline && (
+          <IonCard style={{ margin: '16px', background: '#ffa726' }}>
+            <IonCardContent>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <IonIcon icon={cloudOffline} style={{ color: '#333' }} />
+                <span style={{ color: '#333', fontWeight: 'bold' }}>
+                  Mode hors ligne
+                </span>
+              </div>
+              <p style={{ color: '#333', margin: '8px 0 0 0', fontSize: '0.9em' }}>
+                Les actions de création, modification et suppression d'avis sont désactivées.
+              </p>
+            </IonCardContent>
+          </IonCard>
+        )}
+
+        {isFromCache && (
+          <IonCard style={{ margin: '16px', background: '#e3f2fd' }}>
+            <IonCardContent>
+              <p style={{ color: '#1976d2', margin: 0, fontSize: '0.9em' }}>
+                📱 Ces informations proviennent du cache local et peuvent être obsolètes.
+              </p>
+            </IonCardContent>
+          </IonCard>
+        )}
+
         {place && (
           <>
             <IonCard className="luxury-card" style={{ margin: '16px' }}>
@@ -294,8 +351,9 @@ const PlaceDetail: React.FC = () => {
                         size="small"
                         onClick={() => setShowReviewForm(true)}
                         className="luxury-button"
+                        disabled={!isOnline}
                       >
-                        Ajouter un avis
+                        {isOnline ? 'Ajouter un avis' : 'Hors ligne - Avis indisponible'}
                       </IonButton>
                     )}
                   </div>

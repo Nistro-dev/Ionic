@@ -24,6 +24,7 @@ import {
 import { add, location, star } from 'ionicons/icons';
 import { Place, placeService, SearchParams } from '../services/places';
 import { geolocationService, GeolocationPosition } from '../services/geolocation';
+import { useNetworkContext } from '../contexts/NetworkContext';
 
 const Places: React.FC = () => {
   const [places, setPlaces] = useState<Place[]>([]);
@@ -34,16 +35,23 @@ const Places: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [isFromCache, setIsFromCache] = useState(false);
+  
+  const { isOnline } = useNetworkContext();
 
   const loadPlaces = useCallback(async () => {
     setIsLoading(true);
+    setError('');
+    setIsFromCache(false);
+    
     try {
       const searchParams: SearchParams = {
         name: searchText || undefined,
         type: selectedType || undefined,
       };
 
-      if (userPosition) {
+      // En mode hors ligne, ne pas utiliser la géolocalisation
+      if (userPosition && isOnline) {
         searchParams.lat = userPosition.lat;
         searchParams.lon = userPosition.lon;
         searchParams.radius = 50;
@@ -51,12 +59,23 @@ const Places: React.FC = () => {
 
       const placesData = await placeService.searchPlaces(searchParams);
       setPlaces(placesData);
+      
+      // Afficher un message si les données viennent du cache
+      if (!isOnline) {
+        setIsFromCache(true);
+        setError('Données en cache - Certaines informations peuvent être obsolètes');
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement');
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement';
+      setError(errorMessage);
+      
+      if (!isOnline) {
+        setError('Mode hors ligne - ' + errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [searchText, selectedType, userPosition]);
+  }, [searchText, selectedType, userPosition, isOnline]);
 
   const loadTypes = useCallback(async () => {
     try {
@@ -135,7 +154,7 @@ const Places: React.FC = () => {
             ))}
           </IonSelect>
 
-          {userPosition && (
+          {userPosition && isOnline && (
             <div style={{ 
               marginTop: '12px', 
               padding: '8px 12px', 
@@ -145,6 +164,32 @@ const Places: React.FC = () => {
               color: 'var(--luxury-success-dark)'
             }}>
               📍 Position détectée - Tri par distance activé
+            </div>
+          )}
+
+          {!isOnline && (
+            <div style={{ 
+              marginTop: '12px', 
+              padding: '8px 12px', 
+              background: '#ffa726',
+              borderRadius: '8px',
+              fontSize: '0.9em',
+              color: '#333'
+            }}>
+              ⚠️ Mode hors ligne - Géolocalisation et carte désactivées
+            </div>
+          )}
+
+          {isFromCache && (
+            <div style={{ 
+              marginTop: '8px', 
+              padding: '8px 12px', 
+              background: '#e3f2fd',
+              borderRadius: '8px',
+              fontSize: '0.8em',
+              color: '#1976d2'
+            }}>
+              📱 Données affichées depuis le cache local
             </div>
           )}
         </div>
@@ -167,8 +212,9 @@ const Places: React.FC = () => {
                   routerLink="/places/add"
                   className="luxury-button"
                   style={{ marginTop: '16px' }}
+                  disabled={!isOnline}
                 >
-                  Proposer un établissement
+                  {isOnline ? 'Proposer un établissement' : 'Hors ligne - Ajout indisponible'}
                 </IonButton>
               </IonCardContent>
             </IonCard>
@@ -275,11 +321,13 @@ const Places: React.FC = () => {
 
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
           <IonFabButton 
-            routerLink="/places/add" 
+            routerLink={isOnline ? "/places/add" : undefined}
             className="luxury-fab"
+            disabled={!isOnline}
             style={{ 
-              '--background': 'var(--luxury-gradient)',
-              '--color': 'white'
+              '--background': isOnline ? 'var(--luxury-gradient)' : '#ccc',
+              '--color': 'white',
+              opacity: isOnline ? 1 : 0.6
             }}
           >
             <IonIcon icon={add} />
