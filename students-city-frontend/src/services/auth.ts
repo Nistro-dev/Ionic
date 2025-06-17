@@ -89,18 +89,8 @@ export interface RegisterResponse {
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    console.log('authService.login appelé avec URL:', API_URL);
-    console.log('Capacitor.isNativePlatform():', Capacitor.isNativePlatform());
-    console.log('URL complète de login:', `${API_URL}/login`);
-    
-    try {
-      const response = await api.post("/login", credentials);
-      console.log('Réponse de login reçue:', response.status);
-      return response.data;
-    } catch (error) {
-      console.error('Erreur dans authService.login:', error);
-      throw error;
-    }
+    const response = await api.post("/login", credentials);
+    return response.data;
   },
 
   register: async (data: RegisterData): Promise<RegisterResponse> => {

@@ -107,7 +107,6 @@ class PlaceService {
     }
 
     try {
-      console.log('Récupération des lieux depuis:', `${API_URL}/public/places`);
       const response = await api.get("/public/places");
       const places = response.data;
 
@@ -115,7 +114,6 @@ class PlaceService {
 
       return places;
     } catch (error) {
-      console.error('Erreur lors de la récupération des lieux:', error);
       const cachedPlaces = localCache.get<Place[]>(cacheKey);
       if (cachedPlaces) {
         console.warn("Utilisation du cache suite à une erreur réseau");

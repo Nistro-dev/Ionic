@@ -56,11 +56,9 @@ const Login: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      console.log('Tentative de connexion avec:', { email });
       await login(email, password);
       setShowToast(true);
     } catch (err: unknown) {
-      console.error('Erreur de connexion:', err);
       let errorMessage = "Erreur de connexion";
       
       if (err instanceof Error) {
