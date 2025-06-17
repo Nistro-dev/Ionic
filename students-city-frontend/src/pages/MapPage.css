@@ -1,0 +1,179 @@
+.map-filters {
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.type-filter {
+  flex: 1;
+  --border-radius: 8px;
+  --background: #f8f9fa;
+}
+
+.location-button {
+  min-width: 48px;
+  height: 48px;
+  --border-radius: 12px;
+}
+
+.map-info {
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.map-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+}
+
+.map-container {
+  height: calc(100vh - 200px);
+  position: relative;
+}
+
+.full-map {
+  height: 100%;
+  width: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+}
+
+.loading-container p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Styles pour la modal de détails */
+.place-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.place-type-badge {
+  display: inline-block;
+  background: #3880ff;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  align-self: flex-start;
+}
+
+.place-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rating-text {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.place-address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.place-address ion-icon {
+  color: #3880ff;
+  font-size: 1.1rem;
+}
+
+.place-description {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #3880ff;
+}
+
+.place-description p {
+  margin: 0;
+  line-height: 1.5;
+  color: #555;
+}
+
+.place-coordinates {
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.place-coordinates small {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    height: calc(100vh - 180px);
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .type-filter {
+    width: 100%;
+  }
+
+  .location-button {
+    width: 100%;
+    height: 44px;
+  }
+
+  .map-filters {
+    padding: 12px;
+  }
+}
+
+ion-select {
+  --placeholder-color: #666;
+  --color: #333;
+}
+
+ion-searchbar {
+  --background: #f8f9fa;
+  --border-radius: 12px;
+  --box-shadow: none;
+  --icon-color: #666;
+}
+
+.location-button[disabled] {
+  opacity: 0.6;
+}
+
+ion-toast {
+  --border-radius: 12px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}

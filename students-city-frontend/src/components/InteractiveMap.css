@@ -1,0 +1,147 @@
+.interactive-map {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.leaflet-container {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.place-popup {
+    min-width: 200px;
+    max-width: 280px;
+    padding: 8px;
+}
+
+.place-name {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.3;
+}
+
+.place-type {
+    margin: 0 0 6px 0;
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: capitalize;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+}
+
+.place-address {
+    margin: 0 0 8px 0;
+    font-size: 0.85rem;
+    color: #777;
+    line-height: 1.4;
+}
+
+.place-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.rating-stars {
+    color: #ffd700;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.rating-value {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.place-description {
+    margin: 8px 0 0 0;
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.4;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-popup {
+    text-align: center;
+    padding: 4px;
+}
+
+.user-popup h3 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+    color: #3880ff;
+}
+
+.user-popup p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+
+.leaflet-marker-icon {
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+@media (max-width: 768px) {
+    .place-popup {
+        min-width: 180px;
+        max-width: 220px;
+    }
+
+    .place-name {
+        font-size: 1rem;
+    }
+
+    .place-type {
+        font-size: 0.8rem;
+    }
+
+    .place-address {
+        font-size: 0.8rem;
+    }
+
+    .rating-stars {
+        font-size: 0.9rem;
+    }
+
+    .rating-value {
+        font-size: 0.8rem;
+    }
+}
+
+
+.leaflet-control-zoom {
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.leaflet-control-zoom a {
+    background-color: white !important;
+    border: none !important;
+    color: #333 !important;
+    font-weight: bold !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background-color: #f0f0f0 !important;
+}
+
+
+.leaflet-control-attribution {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 4px !important;
+    font-size: 0.7rem !important;
+}

@@ -12,6 +12,7 @@ import Profile from '../pages/Profile';
 import Places from '../pages/Places';
 import AddPlace from '../pages/AddPlace';
 import PlaceDetail from '../pages/PlaceDetail';
+import MapPage from '../pages/MapPage';
 
 const AppContent: React.FC = () => {
   const { isOnline } = useNetworkContext();
@@ -32,6 +33,7 @@ const AppContent: React.FC = () => {
           <PrivateRoute exact path="/places" component={Places} />
           <PrivateRoute exact path="/places/add" component={AddPlace} />
           <PrivateRoute exact path="/places/:id" component={PlaceDetail} />
+          <PrivateRoute exact path="/map" component={MapPage} />
           <Route exact path="/">
             <Redirect to="/dashboard" />
           </Route>

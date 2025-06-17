@@ -21,6 +21,7 @@ import "@ionic/react/css/display.css";
 import "@ionic/react/css/palettes/dark.system.css";
 
 import "./theme/luxury.css";
+import "leaflet/dist/leaflet.css";
 
 setupIonicReact();
 
